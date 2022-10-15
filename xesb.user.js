@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.1
+// @version      0.2
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -23,7 +23,7 @@
         "en": {
         }
     }
-    let regList = [
+    /* let regList = [
         /^\/$/,
         /^\/g\/[^\/]+\/[^\/]+\/$/,
     ];
@@ -35,7 +35,7 @@
             }
         }
         return -1;
-    }
+    } */
 
     let comicInfo = [];
     // 存zipobject
@@ -49,7 +49,7 @@
                 let html = $.parseHTML(result);
                 name = $(html).find("#gn").text();
                 jpname = $(html).find("#gj").text();
-                page = $(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0];
+                page = Number($(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0]);
             }
         });
         return {
@@ -189,7 +189,7 @@
             success: function (result, status, xhr) {
                 let html = $.parseHTML(result);
                 pageNow = $(html).find("div.gdtm:nth-child(1) > div > a").attr("href");
-                page = $(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0];
+                page = Number($(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0]);
             }
         });
         function loadPage() {
@@ -223,12 +223,12 @@
         $("#xesb_previewBox").scroll(loadPage);
     }
 
-    let pathName = location.pathname;
+    /* let pathName = location.pathname;
     let page = getPage();
     console.log(page);
     if (page == -1) {
         return;
-    }
+    } */
     $("body").append(`
 <div style="position: fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,50%);z-index:1000;display:none;overflow:auto;" id="xesb_panel">
     <h1 style="position: fixed;top:0;right:0;" id="xesb_closePanel">关闭</h1>
@@ -264,7 +264,12 @@
                 <tr><td>-1</td></tr>
             </tbody>
             <tfoot>
-                <tr><td>速度:<input id="xesb_autoScrollSpeed" value="20"></td></tr>
+                <tr>
+                    <td>
+                        高度:<input id="xesb_autoScrollHeight" value="2"><br>
+                        速度:<input id="xesb_autoScrollSpeed" value="20">
+                    </td>
+                </tr>
                 <tr><td id="xesb_autoScrollStart">开滚</td></tr>
                 <tr><td id="xesb_autoScrollStop" style="display:none">停!!!</td></tr>
                 <tr><td id="xesb_fullScreen">全屏</td></tr>
@@ -281,12 +286,11 @@
     $("#xesb_autoScrollStart").click(function () {
         $(this).css("display","none");
         $("#xesb_autoScrollStop").css("display","");
-        let scrollSpeed = $("#xesb_autoScrollSpeed").val();
+        let scrollS = Number($("#xesb_autoScrollSpeed").val());
+        let scrollH = Number($("#xesb_autoScrollHeight").val());
         scroller = setInterval(function () {
-            if($("#xesb_previewBox").scrollTop() < $("#xesb_previewBox").prop("scrollHeight")-$(window).height()) {
-                $("#xesb_previewBox").scrollTop($("#xesb_previewBox").scrollTop()+1);
-            }
-        },scrollSpeed);
+            $("#xesb_previewBox").scrollTop($("#xesb_previewBox").scrollTop()+scrollH);
+        },scrollS);
     });
     $("#xesb_autoScrollStop").click(function () {
         $(this).css("display","none");
@@ -355,59 +359,55 @@
             }
         }
     }
-    if (page == 0) {
-        $("body > div.ido > div:nth-child(2) > table.ptt > tbody > tr,body > div.ido > div:nth-child(2) > table.ptb > tbody > tr").prepend(`
+    $("body > div.ido > div:nth-child(2) > table.ptt > tbody > tr,body > div.ido > div:nth-child(2) > table.ptb > tbody > tr").prepend(`
         <td id="xesb_clear">清空</td>
         <td id="xesb_toggle">反选</td>
-        <td id="xesb_download">开始下载</td>
+        <td id="xesb_downloadItem">开始下载</td>
         `);
-        $(".gl1t > a:nth-child(1)").each(function (index, node) {
-            $(node).prepend(`<input type="checkbox" id="xesb_comicCheck" value="`+$(node).attr("href")+`"/><a id="xesb_openPreviewBox" src="`+$(node).attr("href")+`">长条预览</a>`);
+    $(".gl1t > a:nth-child(1)").each(function (index, node) {
+        $(node).prepend(`<input type="checkbox" id="xesb_comicCheck" value="`+$(node).attr("href")+`"/><a id="xesb_openPreviewBox" src="`+$(node).attr("href")+`">长条预览</a>`);
+    });
+    $("#xesb_clear").click(function () {
+        $("input#xesb_comicCheck:checked").each(function (index, node) {
+            console.log(node);
+            $(node).prop("checked", false);
         });
-        $("#xesb_clear").click(function () {
-            $("input#xesb_comicCheck:checked").each(function (index, node) {
-                console.log(node);
+    });
+    $("#xesb_toggle").click(function () {
+        $("input#xesb_comicCheck").each(function (index, node) {
+            if ($(node).prop('checked')) {
                 $(node).prop("checked", false);
+            } else {
+                $(node).prop("checked", true);
+            }
+        });
+    });
+    $("#xesb_downloadItem").click(function () {
+        let comicUrls = [];
+        $("input#xesb_comicCheck:checked").each(function (index, node) {
+            comicUrls.push($(node).val());
+        });
+        console.log(comicUrls);
+        $("#xesb_panel").fadeIn("fast",function () {
+            comicUrls.map(function (value) {
+                addComic(value);
             });
         });
-        $("#xesb_toggle").click(function () {
-            $("input#xesb_comicCheck").each(function (index, node) {
-                if ($(node).prop('checked')) {
-                    $(node).prop("checked", false);
-                } else {
-                    $(node).prop("checked", true);
-                }
-            });
-        });
-        $("#xesb_download").click(function () {
-            let comicUrls = [];
-            $("input#xesb_comicCheck:checked").each(function (index, node) {
-                comicUrls.push($(node).val());
-            });
-            console.log(comicUrls);
-            $("#xesb_panel").fadeIn("fast",function () {
-                comicUrls.map(function (value) {
-                    addComic(value);
-                });
-            });
-        });
-    }
-    if (page == 1) {
-        $("#gd5").append(`
+    });
+    $("#gd5").append(`
 <p class="g2 gsp">
     <img src="https://ehgt.org/g/mr.gif">
-    <a id="xesb_downoad" style="cursor:pointer">点击下载</a>
+    <a id="xesb_downoadSelf" style="cursor:pointer">点击下载</a>
 </p>
 <p class="g2">
     <img src="https://ehgt.org/g/mr.gif">
     <a id="xesb_openPreviewBox" src="`+location.href+`" style="cursor:pointer">长条预览</a>
 </p>`);
-        $("#xesb_downoad").click(function () {
-            $("#xesb_panel").fadeIn("fast",function () {
-                addComic(location.href);
-            });
+    $("#xesb_downoadSelf").click(function () {
+        $("#xesb_panel").fadeIn("fast",function () {
+            addComic(location.href);
         });
-    }
+    });
     $("a#xesb_openPreviewBox").each(function (index,node) {
         $(node).click(function ({target}) {
             $("body").css("overflow","hidden");

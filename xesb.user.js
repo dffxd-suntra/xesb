@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.2
+// @version      0.3
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -90,7 +90,7 @@
         });
     }
     function download(id,imgSet) {
-        console.log(comicInfo[id].name,picName,"开始下载!");
+        console.log(comicInfo[id].name,"开始下载!");
         comicInfo[id].state = "下载中";
         let pageNow;
         $.ajax({
@@ -142,12 +142,12 @@
         }
         Promise.all(promiseList).then(function () {
             imgSet.file("config.json",JSON.stringify(comicInfo[id]));
-            console.log(comicInfo[id].name,picName,"正在打为zip文件");
+            console.log(comicInfo[id].name,"正在打为zip文件");
             zipList[id].generateAsync({
                 type: "blob"
             }).then(function (blob) {
                 saveAs(blob, comicInfo[id].name + ".zip");
-                console.log(comicInfo[id].name,picName,"下载成功!");
+                console.log(comicInfo[id].name,"下载成功!");
             });
         });
     }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.4
+// @version      0.5
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -101,9 +101,9 @@
         }
     }
     function display() {
-        comicInfo.map(function (comic) {
+        new Promise((resolve, reject) => {
             $("#xesb_displayBox").html("");
-            new Promise((resolve, reject) => {
+            comicInfo.map(function (comic) {
                 $("#xesb_displayBox").html($("#xesb_displayBox").html()+`<tr>
                     <td>`+comic.name+`</td><td>`+comic.secname+`</td><td>`+comic.page+`</td><td>`+comic.progress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
                 </tr>`);
@@ -257,13 +257,14 @@
     if (page == -1) {
         return;
     } */
+    $("head").append(`<meta name="viewport" content="width=device-width, initial-scale=1.0">`);
     $("body").append(`
-<div style="position: fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,50%);z-index:1000;display:none;overflow:auto;" id="xesb_panel">
+<div style="position: fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,50%);z-index:1000;display:none;overflow:auto;padding:0;margin:0;" id="xesb_panel">
     <h1 style="position: fixed;top:0;right:0;" id="xesb_closePanel">关闭</h1>
     <center>
         <h1>xesb 面板</h1>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
-            <tr><th id="xesb_refreshList">刷新列表</th><th id="xesb_dataOutput">输出测试数据</th></tr>
+            <tr><th id="xesb_refreshList">刷新列表</th><th id="xesb_dataOutput">输出测试数据</th><th id="xesb_dataInput">输入测试数据</th></tr>
         </table>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
             <thead>
@@ -276,10 +277,10 @@
         </table>
     </center>
 </div>
-<div style="position: fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,100%);z-index:1000;display:none;overflow:auto" id="xesb_previewBox">
+<div style="position: fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,100%);z-index:1000;display:none;overflow:auto;padding:0;margin:0;" id="xesb_previewBox">
     <h1 style="position: fixed;top:0;right:0;" id="xesb_closePreviewBox">关闭</h1>
-    <h2>
-        <table style="position: fixed;bottom:0;right:0;background: rgba(0,0,0,20%);cursor:pointer;user-select:none;border-collapse:collapse;" border="1">
+    <h2 style="position: fixed;bottom:0;right:0;background: rgba(0,0,0,20%);cursor:pointer;user-select:none;border-collapse:collapse;">
+        <table border="1">
             <thead>
                 <tr><td><h1 id="xesb_showWidth">80%</h1></td></tr>
             </thead>
@@ -310,7 +311,12 @@
     </center>
 </div>
 `);
-    var scroller;
+    $("#xesb_dataInput").click(function () {
+        let jsonstr = prompt("请粘贴文件中的字符串");
+        comicInfo = JSON.parse(jsonstr);
+        display();
+    });
+    let scroller;
     $("#xesb_autoScrollStart").click(function () {
         $(this).css("display","none");
         $("#xesb_autoScrollStop").css("display","");

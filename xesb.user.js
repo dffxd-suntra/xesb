@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.3
+// @version      0.4
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -18,9 +18,30 @@
 // main
 (function () {
     let i18n = {
-        "zh-cn": {
+        "zh-CN": {
         },
         "en": {
+            "清空":"clear",
+            "反选":"Inverse",
+            "开始下载":"strat download",
+            "长条预览":"preview",
+            "xesb面板":"xesb panel",
+            "打开xesb面板":"open xesb panel",
+            "关闭":"close",
+            "高度":"height",
+            "速度":"speed",
+            "开始滚动":"start rolling",
+            "停止滚动":"stop rolling",
+            "全屏":"full screen",
+            "返回顶部":"to top",
+            "名称":"name",
+            "复名称":"secend name",
+            "页数":"pages",
+            "下载图片进度":"progress",
+            "大小":"size",
+            "状态":"state",
+            "刷新列表":"Refresh table",
+            "输出测试数据":"comic data output",
         }
     }
     /* let regList = [
@@ -41,21 +62,22 @@
     // 存zipobject
     let zipList = [];
     function getComicInfo(url) {
-        let name, jpname, page;
+        let name, secname, page;
         $.ajax({
             async: false,
             url: url,
             success: function (result, status, xhr) {
-                let html = $.parseHTML(result);
-                name = $(html).find("#gn").text();
-                jpname = $(html).find("#gj").text();
-                page = Number($(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0]);
+                let html = $("<div></div>");
+                html.html(result);
+                name = $("#gn",html).text();
+                secname = $("#gj",html).text();
+                page = Number($("#gdd > table > tbody > tr:nth-child(6) > td.gdt2",html).text().split(" ")[0]);
             }
         });
         return {
             url: url,
             name: name,
-            jpname: jpname,
+            secname: secname,
             page: page,
             size: 0,
             pageInfo: [],
@@ -83,7 +105,7 @@
             $("#xesb_displayBox").html("");
             new Promise((resolve, reject) => {
                 $("#xesb_displayBox").html($("#xesb_displayBox").html()+`<tr>
-                    <td>`+comic.name+`</td><td>`+comic.jpname+`</td><td>`+comic.page+`</td><td>`+comic.progress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
+                    <td>`+comic.name+`</td><td>`+comic.secname+`</td><td>`+comic.page+`</td><td>`+comic.progress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
                 </tr>`);
                 resolve(comic);
             });
@@ -97,8 +119,9 @@
             async: false,
             url: comicInfo[id].url,
             success: function (result, status, xhr) {
-                let html = $.parseHTML(result);
-                pageNow = $(html).find("div.gdtm:nth-child(1) > div > a").attr("href");
+                let html = $("<div></div>");
+                html.html(result);
+                pageNow = $("#gdt > div:nth-child(1) > a",html).attr("href") || $("#gdt > div:nth-child(1) > div > a",html).attr("href");
             }
         });
 
@@ -111,10 +134,11 @@
                     async: false,
                     url: pageUrl,
                     success: function (result, status, xhr) {
-                        let html = $.parseHTML(result);
-                        picUrl = $(html).find("#img").attr("src");
+                        let html = $("<div></div>");
+                        html.html(result);
+                        picUrl = $("#img",html).attr("src");
                         picName = picUrl.split("/").pop();
-                        pageNow = $(html).find("#i3 > a").attr("href");
+                        pageNow = $("#i3 > a",html).attr("href");
                     }
                 });
                 GM_xmlhttpRequest({
@@ -187,9 +211,11 @@
             async: false,
             url: url,
             success: function (result, status, xhr) {
-                let html = $.parseHTML(result);
-                pageNow = $(html).find("div.gdtm:nth-child(1) > div > a").attr("href");
-                page = Number($(html).find("#gdd > table > tbody > tr:nth-child(6) > td.gdt2").text().split(" ")[0]);
+                let html = $("<div></div>");
+                html.html(result);
+                pageNow = $("#gdt > div:nth-child(1) > a",html).attr("href") || $("#gdt > div:nth-child(1) > div > a",html).attr("href");
+                page = Number($("#gdd > table > tbody > tr:nth-child(6) > td.gdt2",html).text().split(" ")[0]);
+                console.log(pageNow,page);
             }
         });
         function loadPage() {
@@ -201,13 +227,14 @@
                             async: false,
                             url: pageNow,
                             success: function (result, status, xhr) {
-                                let html = $.parseHTML(result);
-                                let picUrl = $(html).find("#img").attr("src");
+                                let html = $("<div></div>");
+                                html.html(result);
+                                let picUrl = $("#img",html).attr("src");
                                 $("#xesb_viewPage").append(`
                                 <li>
                                     <img src="`+picUrl+`" style="width:100%;list-style:none;margin:0;padding:0;">
                                 </li>`);
-                                pageNow = $(html).find("#i3 > a").attr("href");
+                                pageNow = $("#i3 > a",html).attr("href");
                                 resolve(picUrl);
                             }
                         });
@@ -221,6 +248,7 @@
         }
         loadPage();
         $("#xesb_previewBox").scroll(loadPage);
+        $("#xesb_previewBox").click(loadPage);
     }
 
     /* let pathName = location.pathname;
@@ -239,7 +267,7 @@
         </table>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
             <thead>
-                <tr><th>名称</th><th>日本名(如果有)</th><th>页数</th><th>下载图片进度</th><th>大小</th><th>状态</th></tr>
+                <tr><th>名称</th><th>副名称(如果有)</th><th>页数</th><th>下载图片进度</th><th>大小</th><th>状态</th></tr>
             </thead>
             <tbody id="xesb_displayBox">
             </tbody>
@@ -286,11 +314,11 @@
     $("#xesb_autoScrollStart").click(function () {
         $(this).css("display","none");
         $("#xesb_autoScrollStop").css("display","");
-        let scrollS = Number($("#xesb_autoScrollSpeed").val());
-        let scrollH = Number($("#xesb_autoScrollHeight").val());
+        // let scrollS = Number($("#xesb_autoScrollSpeed").val());
+        // let scrollH = Number($("#xesb_autoScrollHeight").val());
         scroller = setInterval(function () {
-            $("#xesb_previewBox").scrollTop($("#xesb_previewBox").scrollTop()+scrollH);
-        },scrollS);
+            $("#xesb_previewBox").scrollTop($("#xesb_previewBox").scrollTop()+Number($("#xesb_autoScrollHeight").val()));
+        }, Number($("#xesb_autoScrollSpeed").val()));
     });
     $("#xesb_autoScrollStop").click(function () {
         $(this).css("display","none");
@@ -302,7 +330,7 @@
         $("#xesb_previewBox").scrollTop(0);
     });
     $("#nb").append(`<div><a id="xesb_openPanel">打开xesb面板</a></div>`);
-    $("#nb").css("max-width",750);
+    $("#nb").css("max-width",(parseInt($("#nb").css("max-width"))||0)+100);
     $("#xesb_refreshList").click(function () {
         display();
     });
@@ -367,13 +395,13 @@
     $(".gl1t > a:nth-child(1)").each(function (index, node) {
         $(node).prepend(`<input type="checkbox" id="xesb_comicCheck" value="`+$(node).attr("href")+`"/><a id="xesb_openPreviewBox" src="`+$(node).attr("href")+`">长条预览</a>`);
     });
-    $("#xesb_clear").click(function () {
+    $("td#xesb_clear").click(function () {
         $("input#xesb_comicCheck:checked").each(function (index, node) {
             console.log(node);
             $(node).prop("checked", false);
         });
     });
-    $("#xesb_toggle").click(function () {
+    $("td#xesb_toggle").click(function () {
         $("input#xesb_comicCheck").each(function (index, node) {
             if ($(node).prop('checked')) {
                 $(node).prop("checked", false);
@@ -382,7 +410,7 @@
             }
         });
     });
-    $("#xesb_downloadItem").click(function () {
+    $("td#xesb_downloadItem").click(function () {
         let comicUrls = [];
         $("input#xesb_comicCheck:checked").each(function (index, node) {
             comicUrls.push($(node).val());

@@ -264,7 +264,7 @@
     <center>
         <h1>xesb 面板</h1>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
-            <tr><th id="xesb_refreshList">刷新列表</th><th id="xesb_dataOutput">输出测试数据</th><th id="xesb_dataInput">输入测试数据</th></tr>
+            <tr><th id="xesb_refreshList">刷新列表</th><th id="xesb_dataOutput">输出测试数据</th><!-- <th id="xesb_dataInput">输入测试数据</th> --></tr>
         </table>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
             <thead>

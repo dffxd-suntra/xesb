@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.5
+// @version      0.5.1
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -12,13 +12,14 @@
 // @require      https://cdn.bootcdn.net/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_download
-// @run-at       document-idle
+// @grant        GM_registerMenuCommand
+// @run-at       document-end
 // ==/UserScript==
 
 // main
 (function () {
     let i18n = {
-        "zh-CN": {
+        "zh": {
         },
         "en": {
             "清空":"clear",
@@ -92,7 +93,7 @@
             'GB': 1073741824,
             'MB': 1048576,
             'kB': 1024,
-            'B ': 1,
+            'B': 1,
         };
         for(let un in unit) {
             if (bytes >= unit[un]) {
@@ -101,16 +102,17 @@
         }
     }
     function display() {
-        new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             $("#xesb_displayBox").html("");
             comicInfo.map(function (comic) {
                 $("#xesb_displayBox").html($("#xesb_displayBox").html()+`<tr>
                     <td>`+comic.name+`</td><td>`+comic.secname+`</td><td>`+comic.page+`</td><td>`+comic.progress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
                 </tr>`);
-                resolve(comic);
             });
+            resolve(comic);
         });
     }
+    // setInterval(display, 1000);
     function download(id,imgSet) {
         console.log(comicInfo[id].name,"开始下载!");
         comicInfo[id].state = "下载中";
@@ -205,7 +207,6 @@
         );
     }
     function preview(url) {
-        $("#xesb_viewPage").html("");
         let pageNow, page, autoPage=0;
         $.ajax({
             async: false,
@@ -221,7 +222,7 @@
         function loadPage() {
             if($("#xesb_previewBox").prop("scrollHeight")-$(window).height()-$("#xesb_previewBox").scrollTop()<=$(window).height()&&autoPage<page) {
                 let times = 2;
-                while(times--) {
+                while(times--&&autoPage<page) {
                     new Promise((resolve, reject) => {
                         $.ajax({
                             async: false,
@@ -240,9 +241,12 @@
                         });
                     });
                     autoPage++;
-                    if(autoPage==page) {
-                        break;
-                    }
+                }
+                if(autoPage==page) {
+                    $("#xesb_viewPage").append(`
+                    <li>
+                        <center><h1>------ The End ------</h1></center>
+                    </li>`);
                 }
             }
         }
@@ -295,8 +299,8 @@
             <tfoot>
                 <tr>
                     <td>
-                        高度:<input id="xesb_autoScrollHeight" value="2"><br>
-                        速度:<input id="xesb_autoScrollSpeed" value="20">
+                        高度:<input id="xesb_autoScrollHeight" value="1"><br>
+                        速度:<input id="xesb_autoScrollSpeed" value="10">
                     </td>
                 </tr>
                 <tr><td id="xesb_autoScrollStart">开滚</td></tr>
@@ -347,15 +351,15 @@
         }),"comicInfo.json");
     });
     $("#xesb_openPanel").click(function () {
-        $("#xesb_panel").fadeIn("fast");
+        $("#xesb_panel").fadeIn("slow");
     });
     $("#xesb_closePanel").click(function () {
-        $("#xesb_panel").fadeOut("fast");
+        $("#xesb_panel").fadeOut("slow");
     });
     $("#xesb_closePreviewBox").click(function () {
         $("body").css("overflow","");
-        $("#xesb_previewBox").unbind();
-        $("#xesb_previewBox").fadeOut("fast");
+        $("#xesb_previewBox").fadeOut("slow");
+        $("#xesb_autoScrollStop").click();
     });
     $("#xesb_widthControlBox > tr > td").each(function (index,node) {
         $(node).click(function () {
@@ -394,6 +398,7 @@
         }
     }
     $("body > div.ido > div:nth-child(2) > table.ptt > tbody > tr,body > div.ido > div:nth-child(2) > table.ptb > tbody > tr").prepend(`
+        <td id="xesb_returnPreview" style="display:none">返回预览</td>
         <td id="xesb_clear">清空</td>
         <td id="xesb_toggle">反选</td>
         <td id="xesb_downloadItem">开始下载</td>
@@ -422,33 +427,44 @@
             comicUrls.push($(node).val());
         });
         console.log(comicUrls);
-        $("#xesb_panel").fadeIn("fast",function () {
+        $("#xesb_panel").fadeIn("slow",function () {
             comicUrls.map(function (value) {
                 addComic(value);
             });
         });
     });
     $("#gd5").append(`
-<p class="g2 gsp">
-    <img src="https://ehgt.org/g/mr.gif">
-    <a id="xesb_downoadSelf" style="cursor:pointer">点击下载</a>
+<p class="g2 gsp" id="xesb_downoadSelf">
+    <img src="https://ehgt.org/g/mr.gif" style="cursor:pointer">
+    <a style="cursor:pointer">点击下载</a>
 </p>
-<p class="g2">
-    <img src="https://ehgt.org/g/mr.gif">
-    <a id="xesb_openPreviewBox" src="`+location.href+`" style="cursor:pointer">长条预览</a>
-</p>`);
-    $("#xesb_downoadSelf").click(function () {
-        $("#xesb_panel").fadeIn("fast",function () {
+<p class="g2" id="xesb_openPreviewBox" src="`+location.href+`">
+    <img src="https://ehgt.org/g/mr.gif" style="cursor:pointer">
+    <a style="cursor:pointer">长条预览</a>
+</p>
+<p class="g2" id="xesb_returnPreview" style="display:none">
+    <img src="https://ehgt.org/g/mr.gif" style="cursor:pointer">
+    <a style="cursor:pointer">返回预览</a>
+</p>
+`);
+    $("*#xesb_downoadSelf").click(function () {
+        $("#xesb_panel").fadeIn("slow",function () {
             addComic(location.href);
         });
     });
-    $("a#xesb_openPreviewBox").each(function (index,node) {
-        $(node).click(function ({target}) {
-            $("body").css("overflow","hidden");
-            $("#xesb_previewBox").fadeIn("fast",function(){
-                preview($(target).attr("src"));
-            });
-            return false;
+    $("*#xesb_openPreviewBox").click(function ({target}) {
+        $("#xesb_previewBox").unbind();
+        $("#xesb_viewPage").html("");
+        $("body").css("overflow","hidden");
+        $("#xesb_previewBox").fadeIn("slow",function(){
+            $("*#xesb_returnPreview").css("display","");
+            preview($(target).attr("src"));
         });
+        return false;
+    });
+    $("*#xesb_returnPreview").click(function ({target}) {
+        $("body").css("overflow","hidden");
+        $("#xesb_previewBox").fadeIn("slow");
+        return false;
     });
 })();

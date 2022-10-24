@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         xesb
 // @author       Suntra
-// @version      0.5.1
+// @version      0.5.2
 // @namespace    https://github.com/dffxd-suntra/xesb
 // @description  exhentai/e-hentai 油猴插件,可以批量爬取图片,并且开发了预览功能
 // @homepage     https://github.com/dffxd-suntra/xesb
@@ -13,12 +13,15 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_download
 // @grant        GM_registerMenuCommand
+// @grant        GM_info
 // @run-at       document-end
+// @antifeature  我不知道该怎么警告,反正这个是色情相关应用,未满18周岁,禁止使用!!!
+// @license      GNU GPLv3
 // ==/UserScript==
 
 // main
 (function () {
-    let i18n = {
+    let i18nList = {
         "zh": {
         },
         "en": {
@@ -38,15 +41,21 @@
             "名称":"name",
             "复名称":"secend name",
             "页数":"pages",
-            "下载图片进度":"progress",
+            "下载图片进度":"download progress",
+            "解析图片进度":"parse progress",
             "大小":"size",
             "状态":"state",
             "刷新列表":"Refresh table",
             "输出测试数据":"comic data output",
         }
     }
+
+    function getI18n(lang = navigator.language.slice(0,2)) {
+        return i18nList[lang];
+    }
     /* let regList = [
         /^\/$/,
+        /^\/tag\/$/,
         /^\/g\/[^\/]+\/[^\/]+\/$/,
     ];
 
@@ -58,6 +67,7 @@
         }
         return -1;
     } */
+    let i18n = getI18n();
 
     let comicInfo = [];
     // 存zipobject
@@ -76,13 +86,15 @@
             }
         });
         return {
+            version: GM_info.script.version,
             url: url,
             name: name,
             secname: secname,
             page: page,
             size: 0,
             pageInfo: [],
-            progress: 0,
+            downloadProgress: 0,
+            parseProgress: 0,
             state: ""
         };
     }
@@ -106,10 +118,10 @@
             $("#xesb_displayBox").html("");
             comicInfo.map(function (comic) {
                 $("#xesb_displayBox").html($("#xesb_displayBox").html()+`<tr>
-                    <td>`+comic.name+`</td><td>`+comic.secname+`</td><td>`+comic.page+`</td><td>`+comic.progress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
+                    <td>`+comic.name+`</td><td>`+comic.secname+`</td><td>`+comic.page+`</td><td>`+comic.parseProgress+`/`+comic.page+`</td><td>`+comic.downloadProgress+`/`+comic.page+`</td><td>`+size_format(comic.size)+`</td><td>`+comic.state+`</td>
                 </tr>`);
             });
-            resolve(comic);
+            resolve(true);
         });
     }
     // setInterval(display, 1000);
@@ -141,6 +153,8 @@
                         picUrl = $("#img",html).attr("src");
                         picName = picUrl.split("/").pop();
                         pageNow = $("#i3 > a",html).attr("href");
+                        comicInfo[id].parseProgress++;
+                        console.log(comicInfo[id].name,picName,"解析成功!",comicInfo[id].parseProgress,"/",comicInfo[id].page);
                     }
                 });
                 GM_xmlhttpRequest({
@@ -148,20 +162,23 @@
                     url: picUrl,
                     responseType: "blob",
                     onload: function (response) {
-                        imgSet.file(picName, response.response, {
-                            "blob": true
-                        });
-                        comicInfo[id].progress++;
-                        comicInfo[id].pageInfo.push({
-                            picUrl: picUrl,
-                            picName: picName,
-                            pageUrl: pageUrl,
-                            size: response.response.size
-                        });
-                        comicInfo[id].size+=response.response.size;
-                        console.log(comicInfo[id].name,picName,"下载成功!",comicInfo[id].progress,"/",comicInfo[id].page);
-                        display();
-                        bigresolve(response.response);
+                        if(response.status==200&&response.readyState==4) {
+                            console.log(response);
+                            imgSet.file(picName, response.response, {
+                                "blob": true
+                            });
+                            comicInfo[id].downloadProgress++;
+                            comicInfo[id].pageInfo.push({
+                                picUrl: picUrl,
+                                picName: picName,
+                                pageUrl: pageUrl,
+                                size: response.response.size
+                            });
+                            comicInfo[id].size+=response.response.size;
+                            console.log(comicInfo[id].name,picName,"下载成功!",comicInfo[id].downloadProgress,"/",comicInfo[id].page);
+                            display();
+                            bigresolve(response.response);
+                        }
                     }
                 });
             }));
@@ -272,7 +289,7 @@
         </table>
         <table style="width: 80%;background: rgba(255,255,255,80%);color:black" border="1">
             <thead>
-                <tr><th>名称</th><th>副名称(如果有)</th><th>页数</th><th>下载图片进度</th><th>大小</th><th>状态</th></tr>
+                <tr><th>名称</th><th>副名称(如果有)</th><th>页数</th><th>解析图片进度</th><th>下载图片进度</th><th>大小</th><th>状态</th></tr>
             </thead>
             <tbody id="xesb_displayBox">
             </tbody>
@@ -403,7 +420,7 @@
         <td id="xesb_toggle">反选</td>
         <td id="xesb_downloadItem">开始下载</td>
         `);
-    $(".gl1t > a:nth-child(1)").each(function (index, node) {
+    $(".gl1t > a:nth-child(1),body > div.ido > form > div.itg.gld > div > div.gl4t.glname.glft > div > a").each(function (index, node) {
         $(node).prepend(`<input type="checkbox" id="xesb_comicCheck" value="`+$(node).attr("href")+`"/><a id="xesb_openPreviewBox" src="`+$(node).attr("href")+`">长条预览</a>`);
     });
     $("td#xesb_clear").click(function () {

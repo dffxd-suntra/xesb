@@ -1,10 +1,8 @@
-/**
- * 来到这里的开发者我跟你讲,不要搞什么sql注入什么的,程序都是前端运行
- */
 // 加载js
 importScripts("https://cdn.jsdelivr.net/gh/dffxd-suntra/xesb@main/script/vwd.min.js");
 importScripts("https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"); 
 importScripts("https://cdn.jsdelivr.net/npm/uuidjs@4.2.12/src/uuid.min.js");
+importScripts("https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js");
 // 返回数据
 function returnData(portId, uuid, data) {
     // uuid: 为客户端随机生成的唯一的任务编号,怎么样来,怎么样还回去

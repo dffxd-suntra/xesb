@@ -1,6 +1,6 @@
 // 加载js
 importScripts("https://cdn.jsdelivr.net/gh/dffxd-suntra/xesb@main/script/vwd.min.js");
-importScripts("https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"); 
+importScripts("https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js");
 importScripts("https://cdn.jsdelivr.net/npm/uuidjs@4.2.12/src/uuid.min.js");
 importScripts("https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js");
 // 返回数据
@@ -66,5 +66,3 @@ this.onconnect = function(e) {
     // 添加端口
     addPort(e.ports[0]);
 }
-
-sql.init();

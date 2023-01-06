@@ -3,6 +3,7 @@ importScripts("https://cdn.jsdelivr.net/gh/dffxd-suntra/xesb@main/script/vwd.min
 importScripts("https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js");
 importScripts("https://cdn.jsdelivr.net/npm/uuidjs@4.2.12/src/uuid.min.js");
 importScripts("https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js");
+
 // 返回数据
 function returnData(portId, uuid, data) {
     // uuid: 为客户端随机生成的唯一的任务编号,怎么样来,怎么样还回去
@@ -16,9 +17,9 @@ function returnData(portId, uuid, data) {
 async function runTask(portId, uuid, func, data) {
     // 否则运行+返回数据
     // 无论是否为promise,统统await
-    returnData(portId, uuid, await func.apply(window, data));
+    returnData(portId, uuid, await new Function(func).apply(window, data));
 }
-// 有一个队列功能是避免数据库未初始化完成
+// 有一个队列功能是避免未初始化完成
 let taskQueue = [];
 function clearTaskQueue() {
     while(taskQueue.length>0) {
@@ -33,7 +34,7 @@ function clearTaskQueue() {
 // 接收数据
 function receiveData(portId, data) {
     // 是否初始化完成,否就存到队列里
-    if(sql.inited) {
+    if(true) {
         // 重要!先清空队列再运行!
         clearTaskQueue();
         // 运行任务

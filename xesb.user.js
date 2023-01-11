@@ -121,9 +121,15 @@ new Function("return this")().XESB = function (userConfig = {}) {
             };
 
             // 普通页面
-            if (0<=this.pageType&&this.pageType<=13) {
+            if (0<=this.pageType&&this.pageType<=12) {
                 this.selector.searchbox = "#searchbox";
                 this.selector.rangebar = "#rangebar";
+                this.selector.mode = ".searchnav > div > select";
+                this.selector.container = "body > div.ido > div";
+            }
+
+            // 流行页面
+            if (this.pageType==13) {
                 this.selector.mode = ".searchnav > div > select";
                 this.selector.container = "body > div.ido > div";
             }

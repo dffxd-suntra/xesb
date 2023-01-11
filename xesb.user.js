@@ -170,7 +170,7 @@ new Function("return this")().XESB = function (userConfig = {}) {
             }
         }
         // 解析页面信息,根据页面节点
-        pasreInfos() {
+        parseInfos() {
             // 获取为数组形式
             let infos = this.nodes.infos.get();
             // 一个一个获取
@@ -236,6 +236,8 @@ new Function("return this")().XESB = function (userConfig = {}) {
 
             // 解析页面
             this.parse();
+
+            return this;
         }
     }
     this.ParsePage = ParsePage;
@@ -324,6 +326,8 @@ new Function("return this")().XESB = function (userConfig = {}) {
 
             // 解析页面
             this.parse();
+
+            return this;
         }
     }
     this.ParseImgPage = ParseImgPage;
@@ -541,6 +545,8 @@ new Function("return this")().XESB = function (userConfig = {}) {
 
             // 解析页面
             this.parse();
+
+            return this;
         }
         // 获取图片页面信息
         async get(page, cache=true) {

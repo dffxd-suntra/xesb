@@ -40,7 +40,9 @@
 // 还没有使用fetch,因为不是很熟悉,一顺手就写成jquery了(看文档确实fetch好用啦
 // 使用刚学的伪类
 let XESB = {};
-XESB.config = {};
+XESB.config = {
+    baseName: "sexb"
+};
 if(localforage.supports(localforage.INDEXEDDB)) {
     localforage.setDriver(localforage.INDEXEDDB);
     XESB.config.supportsCache = true;
@@ -288,6 +290,10 @@ XESB.api = (function () {
 
                 // 图片名称
                 picInfo.name = new URL(picInfo.url).pathname.split("/").pop();
+                if(picInfo.name=="509.gif") {
+                    this.pic = {};
+                    return false;
+                }
 
                 // 图片宽度
                 picInfo.width = parseInt(pic.style.width);
@@ -332,6 +338,15 @@ XESB.api = (function () {
 
                 // 图片高度
                 picInfo.height = parseInt(pic.style.height);
+
+                // 完整图片链接
+                picInfo.full = this.pic.full;
+
+                // 图片索引
+                picInfo.fileIndex = this.pic.fileIndex;
+
+                // 画廊地址
+                picInfo.galleryUrl = this.pic.galleryUrl;
 
                 return picInfo;
             }
@@ -767,6 +782,16 @@ XESB.download = (function () {
 
 
 XESB.page = (function () {
+    async function cacheImage(fileIndex, blob) {
+        if(!XESB.config.supportsCache) {
+            return false;
+        }
+        if(blob) {
+            await localforage.setItem(XESB.config.baseName+"_image_cache_"+fileIndex, blob);
+            return blob;
+        }
+        return await localforage.getItem(XESB.config.baseName+"_image_cache_"+fileIndex);
+    }
     class GalleryDownload {
         constructor(url) {
             this.url = url;
@@ -827,6 +852,7 @@ XESB.page = (function () {
             }
             // 下载成功回调
             function downloadSuccess(source, picInfo) {
+                cacheImage(picInfo.fileIndex, source);
                 files.list.success.push([source, picInfo]);
                 console.log("下载成功", files.list.fail.length+files.list.success.length, files.total);
                 checkOver();
@@ -854,8 +880,16 @@ XESB.page = (function () {
                 });
             }
             // 开始下载
-            function startDownload(pageInfo, page) {
+            async function startDownload(pageInfo, page) {
                 console.log("开始下载", page);
+                if(XESB.config.supportsCache) {
+                    let imgBlob = await cacheImage(pageInfo.pic.fileIndex);
+                    if(imgBlob) {
+                        console.log("调取缓存", page);
+                        downloadSuccess(imgBlob, pageInfo.pic);
+                        return;
+                    }
+                }
                 that.download.add({
                     url: pageInfo.pic.url,
                     onload: function (source, xhr) {
@@ -899,7 +933,7 @@ XESB.page = (function () {
         downloadBtn.click(async function () {
             let a = new GalleryDownload(location.href);
             await a.init();
-            await a.start("all");
+            await a.start("all", {});
         });
 
         $("#gd5").append(downloadBox);

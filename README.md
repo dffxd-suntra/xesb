@@ -15,8 +15,9 @@
 对于第三点，我有更庞大的想法
 <details>
     <summary>点击查看想法</summary>
-    <h1>我可以让插件变成浏览器应用（pwm）并利用扩展插件丰富的功能做到以下这样子的页面，而且是完全的js（展示的图片是我架在家里的nas+一点点php的结果）其实普通的js页面也可以做到，只不过产生不了用户粘性，而且有限制，我就放弃了</h1>
+    <h1>我可以让插件变成浏览器应用（pwm）并利用扩展插件丰富的功能做到以下这样子的页面，而且是完全的js（展示的图片是我架在家里的nas+一点点php的结果）其实普通的js页面也可以做到，只不过产生不了用户粘性，而且有限制，我就懒得做了，现在又有这个机会了，又有了新的动力，只要让我看见多一个star（当前2），我这个寒假死活都会给你们做出来</h1>
     <img src="https://user-images.githubusercontent.com/47025714/212099981-4ce25ba5-9fbb-440d-ae3e-34bf1ac408a6.png"/>
+    <img src="https://user-images.githubusercontent.com/47025714/212103524-a38ff790-88ad-4da2-abd2-94b8b9a9a5ca.png"/>
 </details>
 
 

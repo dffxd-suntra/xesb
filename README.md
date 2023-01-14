@@ -29,12 +29,3 @@
 3. 非常方便
 4. 超级方便
 5. 无敌方便
-
-## 2023.1.13 我来汇报啦!修了几个小bug,修了一堆大bug,但是都没有push,因为我已经开始在做chrome插件了,插件还没有完善,我就不发上来了,页面解析,文件下载等等的我都移植到worker里了,worker里不让用xhr,我改fetch就废了好久的工夫(fetch不给onprogress,我要自己写解析才能获取到下载进度)
-<details>
-    <summary>点击查看进度图片</summary>
-    <img src="https://user-images.githubusercontent.com/47025714/212268319-aaea2032-1837-421f-823c-ba279d4e529a.png"/>
-    <img src="https://user-images.githubusercontent.com/47025714/212269070-00618384-22ef-44fe-a38d-b04499548954.png"/>
-    <img src="https://user-images.githubusercontent.com/47025714/212269127-6753d871-422e-4496-87e7-59452dda1496.png"/>
-    <img src="https://user-images.githubusercontent.com/47025714/212267952-4656a9e8-4b60-40ef-8365-fc481c7280a3.png"/>
-</details>

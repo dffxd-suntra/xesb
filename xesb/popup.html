@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="description" content="一堆漫画" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XESB</title>
+    <link rel="shortcut icon" href="icons/icon-x32.png" />
+    <link rel="stylesheet" href="css/semantic.min.css" />
+    <style>
+        body {
+            background: #1b1c1d;
+            margin: 0 !important;
+        }
+
+        #tabs>.tab {
+            margin: 0;
+            padding: 12px;
+        }
+
+        #tabLabels {
+            border-right: 2px gray solid;
+        }
+
+        #downloadQueueItems {
+            margin: 0;
+        }
+
+        #downloadQueueTabs {
+            padding: 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ui grid full height">
+        <div class="row">
+            <div class="three wide column" style="padding-right: 0;">
+                <div class="ui list inverted selection divided" id="tabLabels">
+                    <a class="active item" data-tab="operate">操作</a>
+                    <a class="item" data-tab="queue">队列</a>
+                    <a class="item" data-tab="function">功能</a>
+                    <a class="item" data-tab="about">关于</a>
+                </div>
+            </div>
+            <div class="thirteen wide column" id="tabs" style="padding: 0;">
+                <div class="ui segment tab active inverted" data-tab="operate">
+                    <div class="ui icon header">操作</div>
+                    <div class="ui relaxed divided inverted list">
+                        <div class="item">
+                            <i class="download icon"></i>
+                            <div class="content">
+                                <a class="header" id="downloadThisGallery">下载本画廊</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment tab inverted" data-tab="queue" id="downloadQueueTabs">
+                    <div class="ui secondary pointing menu inverted" id="downloadQueueItems">
+                        <a class="item active" data-tab="waitingQueue">等待</a>
+                        <a class="item" data-tab="runningQueue">运行中</a>
+                        <a class="item" data-tab="completeQueue">完成</a>
+                    </div>
+                    <ol class="ui list tab inverted active" data-tab="waitingQueue" id="waitingQueueInfo">
+                        <li>Gaining Access</li>
+                        <li>Inviting Friends</li>
+                        <li>Benefits
+                            <ol>
+                                <li>Use Anywhere</li>
+                                <li>Rebates</li>
+                                <li>Discounts</li>
+                            </ol>
+                        </li>
+                        <li>Warranty</li>
+                    </ol>
+                    <ol class="ui list tab inverted" data-tab="runningQueue" id="runningQueueInfo">
+                    </ol>
+                    <ol class="ui list tab inverted" data-tab="completeQueue" id="completeQueueInfo">
+                    </ol>
+                    <!-- <div class="ui active inline centered text loader">加载中</div> -->
+                </div>
+                <div class="ui segment tab inverted" data-tab="function">
+                    <div class="ui icon header">功能</div>
+                    <div class="ui relaxed divided inverted list">
+                        <div class="item">
+                            <i class="file alternate icon"></i>
+                            <div class="content">
+                                <a class="header" target="_blank" href="pages/index.html">本地画廊页面</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui segment tab inverted" data-tab="about">
+                    <div class="ui icon header">关于</div>
+                    <p>作者: Suntra</p>
+                    <p>项目地址: <a href="https://github.com/dffxd-suntra/xesb">https://github.com/dffxd-suntra/xesb</a></p>
+                    <p>未经允许不得转载,盈利 本插件遵循<a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU 3.0</a>协议</p>
+                </div>
+            </div>
+        </div>
+        <div class="equal width row ui segment inverted" style="padding-top: 0;">
+            <div class="column" id="formatedStartTimestramp"></div>
+        </div>
+    </div>
+    <script src="script/jquery.min.js"></script>
+    <script src="script/semantic.min.js"></script>
+    <script src="script/moment.min.js"></script>
+    <script src="script/zh-cn.moment.js"></script>
+    <script src="script/jszip.min.js"></script>
+    <script src="script/uuid.min.js"></script>
+    <script src="script/不知道怎么起名所以就用中文的摆烂结果.js"></script>
+    <script src="script/xesb.js"></script>
+    <script src="script/downloadFiles.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

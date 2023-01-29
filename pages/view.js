@@ -83,7 +83,7 @@ function showMenu(baseId, menus, appTo = $("body")) {
         // console.log(0,list);
         // 这里是 这一级菜单的 一个小盒子,生成完后会添加到大盒子里
         // 按钮盒子
-        let box = $(`<div class="ui vertical buttons" style="background-color: rgba(0,0,0,30%);"></div>`);
+        let box = $(`<div class="ui vertical buttons" style="background-color: rgba(0,0,0,50%);"></div>`);
         box.attr("id", boxPreId + id);
         // 假设这个不是根目录(菜单),那就隐藏
         if (preBox != null) {

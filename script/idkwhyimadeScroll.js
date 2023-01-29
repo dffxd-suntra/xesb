@@ -39,19 +39,31 @@ class idkScroll {
         // 是否正在等待回复 当this.dontWait为true时忽略
         this.waitForReturn = false;
 
+        let that = this;
         this.proxyFunc = function () {
-            that.checkScroll.apply(that);
+            that.checkBottom.apply(that);
         };
 
-        // 默认执行一遍
-        this.checkScroll();
-
-        let that = this;
-
-        // 开启滚动检测
-        $(document).scroll(this.proxyFunc);
+        // 开始检测
+        this.scroll("on");
     }
-    checkScroll() {
+    // 开启或关闭滚动检测(是否停止检测)
+    scroll(str) {
+        if (str == "on") {
+            // 开始检测
+            // 默认执行一遍
+            this.checkBottom();
+
+            // 开启滚动检测
+            $(document).scroll(this.proxyFunc);
+        }
+        if (str == "off") {
+            // 停止检测
+            $(document).off("scroll", this.proxyFunc);
+        }
+    }
+    // 检查是否到底
+    checkBottom() {
         // 合理运用表达式排序和短路来减少时间复杂度(省不了多少)
         // 只算实际高度+内边距
         if (
@@ -78,25 +90,24 @@ class idkScroll {
 
         this.waitForReturn = false;
 
-        this.checkEnd();
-
-        // 如果结束就不必再运行
-        if (this.length < this.total && this.autoFull) {
-            // 小心处理异步this,setTimeout里的this将会被替换为globalThis
-            let that = this;
-            setTimeout(function () {
-                that.checkScroll.apply(that);
-            }, this.delay);
-        }
-    }
-    // 检查结束
-    checkEnd() {
-        if (this.length >= this.total) {
+        if (this.isEnd()) {
             // 停止检测
-            $(document).off("scroll", this.proxyFunc);
+            this.scroll("off");
 
             // 运行结束函数
             this.whenEnd(this.node, this);
+        } else {
+            if (this.autoFull) {
+                // 小心处理异步this,setTimeout里的this将会被替换为globalThis
+                let that = this;
+                setTimeout(function () {
+                    that.checkBottom.apply(that);
+                }, this.delay);
+            }
         }
+    }
+    // 检查结束
+    isEnd() {
+        return this.length >= this.total;
     }
 }

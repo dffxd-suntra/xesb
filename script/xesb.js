@@ -421,10 +421,10 @@ const XESB = (function () {
                 this.categories = this.nodes.categories.text();
 
                 // 作者名
-                this.auther = this.nodes.auther.text();
+                this.auther = this.nodes.auther.text() || null;
 
                 // 作者链接
-                this.autherUrl = this.nodes.auther.attr("href");
+                this.autherUrl = this.nodes.auther.attr("href") || null;
 
                 // 发送时间(时间戳
                 this.postTime = moment(temp1.Posted.text()).valueOf();
@@ -520,8 +520,8 @@ const XESB = (function () {
                     that.comments.push({
                         id: id,
                         uploder: {
-                            name: $(node).find(".c2 > .c3 > a").text(),
-                            url: $(node).find(".c2 > .c3 > a").attr("href")
+                            name: $(node).find(".c2 > .c3 > a").text() || null,
+                            url: $(node).find(".c2 > .c3 > a").attr("href") || null
                         },
                         content: $(node).find(".c6").text(),
                         score: score,

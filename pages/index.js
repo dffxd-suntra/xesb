@@ -28,7 +28,7 @@ async function galleryToCard(gallery) {
 }
 
 async function showGalleryCards(page, limit) {
-    updateUrl(page, limit);
+    // updateUrl(page, limit);
     let data = await sendMessage({
         type: "getGalleryInfos",
         data: {

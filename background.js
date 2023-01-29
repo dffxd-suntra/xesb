@@ -161,7 +161,7 @@ class GalleryDownload {
                             throw new Error(`509 Error`);
                         }
                         // console.log(that.type, that.ParseGallery.gid, pageInfo);
-                        let picCache = SQL.getPic({ type: that.type, gid: that.ParseGallery.gid, fileIndex: pageInfo.pic.fileIndex });
+                        let picCache = SQL.getPic({ fileIndex: pageInfo.pic.fileIndex });
                         if (picCache == null) {
                             if (that.type == "compressed") {
                                 downloadCompressed(pageInfo, page, retriesNum);
@@ -447,28 +447,37 @@ class GalleryDownloadQueue {
     };
 
     SQL.addPic = function (blob, type, gid, imgPage) {
-        let temparr = [
-            gid,
-            imgPage.pic.fileIndex,
-            imgPage.pic.name,
-            imgPage.page,
-            type,
-            blob.size,
-        ];
-        if (type == "compressed") {
-            temparr.push(
-                imgPage.pic.height,
-                imgPage.pic.width
-            );
+        if (
+            SQL.xesb.exec(`SELECT count(*) FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
+                gid,
+                imgPage.pic.fileIndex,
+                type
+            ])[0].values[0][0] == 0
+        ) {
+            let temparr = [
+                gid,
+                imgPage.pic.fileIndex,
+                imgPage.pic.name,
+                imgPage.page,
+                type,
+                blob.size,
+            ];
+            if (type == "compressed") {
+                temparr.push(
+                    imgPage.pic.height,
+                    imgPage.pic.width
+                );
+            }
+            if (type == "full") {
+                temparr.push(
+                    imgPage.pic.fullHeight,
+                    imgPage.pic.fullWidth
+                );
+            }
+            SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
         }
-        if (type == "full") {
-            temparr.push(
-                imgPage.pic.fullHeight,
-                imgPage.pic.fullWidth
-            );
-        }
-        SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
-        let id = SQL.xesb.exec(`SELECT id FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
+        
+        let id = SQL.xesb.exec(`SELECT count(*) FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
             gid,
             imgPage.pic.fileIndex,
             type
@@ -510,6 +519,8 @@ class GalleryDownloadQueue {
         }
 
         qStr = qStr.substring(0, qStr.length - 5);
+
+        // console.log(qArr, qStr);
 
         let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE ${qStr};`, qArr)[0];
         if (infos == undefined) {

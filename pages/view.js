@@ -7,7 +7,7 @@ async function addPic(page, limit) {
         let picUrl = URL.createObjectURL(pic);
         $("#view").append(
             $(`<div class="pics"></div>`).append(
-                $(`<span class="showPage"></span>`).text(pics[i].page),
+                $(`<span class="showPage"></span>`).text(pics[i].page+"/"+gallery.pages),
                 $(`<img/>`).attr({
                     src: picUrl,
                     art: pics[i].name

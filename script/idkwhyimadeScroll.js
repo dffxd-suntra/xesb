@@ -12,7 +12,7 @@
  * }
  */
 class idkScroll {
-    constructor(node, { page = 0, limit = 10, onBottom = function () { }, whenEnd = function () { }, dontWait = false, autoFull = true, delay = 100, toTop = 0 } = {}) {
+    constructor(node, { page = 0, limit = 10, onBottom = function () { }, whenEnd = function () { }, dontWait = false, autoFull = true, delay = 100, toTop = 0, total = null } = {}) {
         if (node.constructor === String) {
             node = $(node).get(0);
         }
@@ -20,7 +20,7 @@ class idkScroll {
 
         this.length = page * limit;
 
-        this.total = null;
+        this.total = total;
 
         this.limit = limit;
 
@@ -67,8 +67,8 @@ class idkScroll {
         // 合理运用表达式排序和短路来减少时间复杂度(省不了多少)
         // 只算实际高度+内边距
         if (
-            // 没有加载完成为true 利用编程语言对或的短路来规避this.total没有值的情况
-            (this.total == null || this.length < this.total) &&
+            // 没有加载完成为true
+            !this.isEnd() &&
             // 没有正在等待回应或开启了不等待模式为true
             (!this.waitForReturn || this.dontWait) &&
             // 窗口下边框之后this.toTop像素的高度大于等于元素下边框(不含)的高度为true
@@ -108,6 +108,6 @@ class idkScroll {
     }
     // 检查结束
     isEnd() {
-        return this.length >= this.total;
+        return this.total != null && this.length >= this.total;
     }
 }

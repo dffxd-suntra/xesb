@@ -536,7 +536,7 @@ class GalleryDownloadQueue {
     };
 
     SQL.getPics = function (gid) {
-        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY page ASC;`, [gid])[0];
+        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY reg_date DESC;`, [gid])[0];
         if (infos == undefined) {
             return [];
         }

@@ -476,7 +476,7 @@ class GalleryDownloadQueue {
             }
             SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
         }
-        
+
         let id = SQL.xesb.exec(`SELECT count(*) FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
             gid,
             imgPage.pic.fileIndex,
@@ -538,7 +538,7 @@ class GalleryDownloadQueue {
     SQL.getPics = function (gid) {
         let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY page ASC;`, [gid])[0];
         if (infos == undefined) {
-            return null;
+            return [];
         }
         let pics = [];
         for (let i in infos.values) {

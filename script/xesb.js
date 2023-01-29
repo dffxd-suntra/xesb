@@ -415,7 +415,7 @@ const XESB = (function () {
                 this.secondaryName = this.nodes.secondaryName.text();
 
                 // 封面地址
-                this.cover = this.nodes.cover.get(0).style.background.match(/(?<=url\("?).*(?="?\))/g)[0];
+                this.cover = this.nodes.cover.get(0).style.background.match(/(?<=url\("*).*(?="*\))/g)[0];
 
                 // 画廊类别(例如 Image Set
                 this.categories = this.nodes.categories.text();

@@ -3,13 +3,22 @@ async function galleryToCard(gallery) {
         type: "getCover",
         gid: gallery.gid
     }));
-    let coverBlob = await useCache(cover.cache_name);
-    let coverUrl = URL.createObjectURL(coverBlob);
+    // console.log(cover, gallery);
+    let coverUrl, coverHTML = $(`<img style="width: 100%;"/>`);
+    if (cover != null) {
+        let coverBlob = await useCache(cover.cache_name);
+        coverUrl = URL.createObjectURL(coverBlob);
+        coverHTML.get(0).style.aspectRatio = cover.width+"-"+cover.height;
+    } else {
+        coverUrl = "../icons/icon-x1024.png";
+    }
+    coverHTML.attr("src", coverUrl);
+    coverHTML = coverHTML.prop("outerHTML");
     return $(`
     <div class="gallery">
         <div class="ui card">
             <div class="image">
-                <a href="view.html?gid=${gallery.gid}" target="_blank"><img src="${coverUrl}" style="aspect-ratio: ${cover.width}/${cover.height};width: 100%;"/></a>
+                <a href="view.html?gid=${gallery.gid}" target="_blank">${coverHTML}</a>
             </div>
             <div class="content">
                 <a href="view.html?gid=${gallery.gid}" target="_blank">
@@ -44,7 +53,7 @@ async function showGalleryCards(page, limit) {
         galleryCards.push(await galleryToCard(gallerys[i]));
     }
     $("#galleryCards").append(galleryCards);
-    macy.recalculate();
+    setTimeout(function () { macy.recalculate(); }, 1);
     idkscroll.end(gallerys.length, total);
 }
 
@@ -56,7 +65,6 @@ let url = new URL(location.href);
 
 let macy = Macy({
     container: "#galleryCards",
-    trueOrder: false,
     waitForImages: false,
     margin: 8,
     columns: 6,
@@ -65,7 +73,6 @@ let macy = Macy({
         1800: 5,
         1200: 4,
         800: 3,
-        600: 2,
     }
 });
 

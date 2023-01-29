@@ -447,13 +447,9 @@ class GalleryDownloadQueue {
     };
 
     SQL.addPic = function (blob, type, gid, imgPage) {
-        if (
-            SQL.xesb.exec(`SELECT count(*) FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
-                gid,
-                imgPage.pic.fileIndex,
-                type
-            ])[0].values[0][0] == 0
-        ) {
+        console.log(blob, type, gid, imgPage, imgPage.pic.fileIndex);
+        if (SQL.xesb.exec(`SELECT count(*) FROM pics WHERE fileIndex = ?;`, [imgPage.pic.fileIndex])[0]["values"][0][0] == 0) {
+            console.log("in")
             let temparr = [
                 gid,
                 imgPage.pic.fileIndex,
@@ -477,11 +473,7 @@ class GalleryDownloadQueue {
             SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
         }
 
-        let id = SQL.xesb.exec(`SELECT count(*) FROM pics WHERE gid = ? AND fileIndex =  ? AND type = ?;`, [
-            gid,
-            imgPage.pic.fileIndex,
-            type
-        ])[0].values[0][0];
+        let id = SQL.xesb.exec(`SELECT id FROM pics WHERE fileIndex = ?;`, [imgPage.pic.fileIndex])[0]["values"][0][0];
         console.log("set cache", id, blob);
         SQL.lastExecTime = Date.now();
         auto_sync();

@@ -379,7 +379,7 @@ class GalleryDownloadQueue {
         limit = Math.abs(limit);
         page = Math.max(Math.abs(page), 1);
         let total = SQL.xesb.exec(`SELECT count(*) FROM gallerys;`)[0].values[0][0];
-        let infos = SQL.xesb.exec(`SELECT * FROM gallerys LIMIT ? OFFSET ?;`, [limit, (page - 1) * limit])[0];
+        let infos = SQL.xesb.exec(`SELECT * FROM gallerys  ORDER BY reg_date DESC LIMIT ? OFFSET ?;`, [limit, (page - 1) * limit])[0];
         if (infos == undefined) {
             return [];
         }
@@ -536,7 +536,7 @@ class GalleryDownloadQueue {
     };
 
     SQL.getPics = function (gid) {
-        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY reg_date DESC;`, [gid])[0];
+        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY page ASC;`, [gid])[0];
         if (infos == undefined) {
             return [];
         }
@@ -579,7 +579,7 @@ class GalleryDownloadQueue {
             return;
         }
         syncing = true;
-        if (SQL.lastExecTime > (await useCache("xesb_database_lastExecTime") || -1)) {
+        if (SQL.lastExecTime >= (await useCache("xesb_database_lastExecTime") || -1)) {
             await useCache("xesb_database_lastExecTime", SQL.lastExecTime);
             await useCache("xesb_database", SQL.xesb.export());
         } else {

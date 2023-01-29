@@ -7,6 +7,7 @@ async function galleryToCard(gallery) {
     let coverUrl, coverHTML = $(`<img style="width: 100%;"/>`);
     if (cover != null) {
         let coverBlob = await useCache(cover.cache_name);
+        console.log(coverBlob);
         coverUrl = URL.createObjectURL(coverBlob);
         coverHTML.get(0).style.aspectRatio = cover.width+"-"+cover.height;
     } else {

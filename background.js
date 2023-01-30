@@ -46,15 +46,12 @@ class GalleryDownload {
                     bigresolve(that);
                 }
             }
-            async function downloadSuccess(pageInfo, page, retriesNum, pic) {
+            async function downloadSuccess(pageInfo, page, retriesNum, blob) {
                 that.downloadProgress++;
-                if (pic.id === undefined) {
-                    // console.log(pic.blob, that.type, that.ParseGallery.gid, pageInfo);
-                    pic.id = await SQL.addPic(pic.blob, that.type, that.ParseGallery.gid, pageInfo);
-                }
+                let picInfo = await SQL.addPic(blob, that.type, that.ParseGallery.gid, pageInfo);
 
                 that.files.pages[page] = {
-                    pic: pic,
+                    pic: picInfo,
                     info: pageInfo
                 };
                 that.completeQueue.push([page, retriesNum]);
@@ -91,12 +88,7 @@ class GalleryDownload {
                         if (response.status != 200) {
                             downloadFail(pageInfo, page, retriesNum, new Error(`http status error ${response.status}`));
                         }
-                        downloadSuccess(pageInfo, page, retriesNum, {
-                            blob: data,
-                            name: pageInfo.pic.name,
-                            width: pageInfo.pic.fullWidth,
-                            height: pageInfo.pic.fullHeight
-                        });
+                        downloadSuccess(pageInfo, page, retriesNum, data);
                     }
                 });
             }
@@ -113,12 +105,7 @@ class GalleryDownload {
                         if (response.status != 200) {
                             downloadFail(pageInfo, page, retriesNum, new Error(`http status error ${response.status}`));
                         }
-                        downloadSuccess(pageInfo, page, retriesNum, {
-                            blob: data,
-                            name: pageInfo.pic.name,
-                            width: pageInfo.pic.width,
-                            height: pageInfo.pic.height
-                        });
+                        downloadSuccess(pageInfo, page, retriesNum, data);
                     }
                 });
             }
@@ -135,12 +122,7 @@ class GalleryDownload {
                             // console.warn("尝试备用路线", error);
                             downloadCompressedSpare(pageInfo, page, retriesNum);
                         }
-                        downloadSuccess(pageInfo, page, retriesNum, {
-                            blob: data,
-                            name: pageInfo.pic.name,
-                            width: pageInfo.pic.width,
-                            height: pageInfo.pic.height
-                        });
+                        downloadSuccess(pageInfo, page, retriesNum, data);
                     }
                 });
             }
@@ -161,7 +143,7 @@ class GalleryDownload {
                             throw new Error(`509 Error`);
                         }
                         // console.log(that.type, that.ParseGallery.gid, pageInfo);
-                        let picCache = SQL.getPic({ fileIndex: pageInfo.pic.fileIndex });
+                        let picCache = SQL.getPic({ fileIndex: pageInfo.pic.fileIndex, type: that.type });
                         if (picCache == null) {
                             if (that.type == "compressed") {
                                 downloadCompressed(pageInfo, page, retriesNum);
@@ -170,8 +152,7 @@ class GalleryDownload {
                                 downloadFull(pageInfo, page, retriesNum);
                             }
                         } else {
-                            picCache.blob = await useCache(picCache.cache_name);
-                            downloadSuccess(pageInfo, page, retriesNum, picCache);
+                            downloadSuccess(pageInfo, page, retriesNum, await useCache(picCache.cache_name));
                         }
                     } catch (error) {
                         downloadFail(pageInfo, page, retriesNum, error);
@@ -379,7 +360,7 @@ class GalleryDownloadQueue {
         limit = Math.abs(limit);
         page = Math.max(Math.abs(page), 1);
         let total = SQL.xesb.exec(`SELECT count(*) FROM gallerys;`)[0].values[0][0];
-        let infos = SQL.xesb.exec(`SELECT * FROM gallerys  ORDER BY reg_date DESC LIMIT ? OFFSET ?;`, [limit, (page - 1) * limit])[0];
+        let infos = SQL.xesb.exec(`SELECT * FROM gallerys ORDER BY reg_date DESC LIMIT ? OFFSET ?;`, [limit, (page - 1) * limit])[0];
         if (infos == undefined) {
             return [];
         }
@@ -446,18 +427,24 @@ class GalleryDownloadQueue {
         return comments;
     };
 
+    // start
     SQL.addPic = function (blob, type, gid, imgPage) {
-        if (SQL.xesb.exec(`SELECT count(*) FROM pics WHERE type = ? AND gid = AND page = ?;`, [type, gid, imgPage.page])[0]["values"][0][0] == 0) {
+        // 检测图片源文件是否缓存 pics table
+        if (SQL.xesb.exec(`
+        SELECT count(*)
+        FROM pics
+        WHERE
+            fileIndex = ? AND
+            type = ?;
+        `, [imgPage.pic.fileIndex, type])[0]["values"][0][0] == 0) {
+            // 插入
             let temparr = [
-                gid,
-                null,
+                imgPage.pic.fileIndex,
                 imgPage.pic.name,
-                imgPage.page,
                 type,
                 blob.size,
             ];
             if (type == "compressed") {
-                temparr[1] == imgPage.pic.fileIndex;
                 temparr.push(
                     imgPage.pic.height,
                     imgPage.pic.width
@@ -469,15 +456,42 @@ class GalleryDownloadQueue {
                     imgPage.pic.fullWidth
                 );
             }
-            SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
+            SQL.xesb.run("INSERT INTO pics(fileIndex,name,type,size,height,width) VALUES(?,?,?,?,?,?);", temparr);
         }
 
-        let id = SQL.xesb.exec(`SELECT id FROM pics WHERE type = ? AND gid = AND page = ?;`, [type, gid, imgPage.page])[0]["values"][0][0];
+        // 获取id
+        let id = SQL.xesb.exec(`
+        SELECT id
+        FROM pics
+        WHERE
+            fileIndex = ? AND
+            type = ?;
+        `, [imgPage.pic.fileIndex, type])[0]["values"][0][0];
+
+        // 检测图片链接是否存在 relationships table
+        if (SQL.xesb.exec(`
+        SELECT count(*)
+        FROM relationships
+        WHERE
+            gid = ? AND
+            page = ?;
+        `, [gid, imgPage.page])[0]["values"][0][0] == 0) {
+            // 插入
+            SQL.xesb.run("INSERT INTO relationships(pid,gid,page) VALUES(?,?,?);", [
+                id,
+                gid,
+                imgPage.page
+            ]);
+        }
+
+        // 创建/更新 缓存
+        useCache("xesb_pic_" + id, blob);
         console.log("set cache", id, blob);
+        // 自动同步数据库
         SQL.lastExecTime = Date.now();
         auto_sync();
-        useCache("xesb_pic_" + id, blob);
-        return id;
+        // 默认返回值
+        return SQL.getPic({ id: id });
     };
 
     SQL.getPic = function ({ id, page, type, gid, fileIndex }) {
@@ -485,23 +499,23 @@ class GalleryDownloadQueue {
         let qArr = [];
 
         if (id != undefined) {
-            qStr += "id = ? AND ";
+            qStr += "pics.id = ? AND ";
             qArr.push(id);
         }
         if (page != undefined) {
-            qStr += "page = ? AND ";
+            qStr += "relationships.page = ? AND ";
             qArr.push(page);
         }
         if (type != undefined) {
-            qStr += "type = ? AND ";
+            qStr += "pics.type = ? AND ";
             qArr.push(type);
         }
         if (gid != undefined) {
-            qStr += "gid = ? AND ";
+            qStr += "relationships.gid = ? AND ";
             qArr.push(gid);
         }
         if (fileIndex != undefined) {
-            qStr += "fileIndex = ? AND ";
+            qStr += "pics.fileIndex = ? AND ";
             qArr.push(fileIndex);
         }
 
@@ -513,7 +527,23 @@ class GalleryDownloadQueue {
 
         // console.log(qArr, qStr);
 
-        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE ${qStr};`, qArr)[0];
+        // 连结表
+        let infos = SQL.xesb.exec(`
+        SELECT
+            pics.id,
+            relationships.gid,
+            pics.fileIndex,
+            pics.name,
+            relationships.page,
+            pics.type,
+            pics.size,
+            pics.height,
+            pics.width,
+            relationships.reg_date
+        FROM
+            pics,
+            relationships
+        WHERE relationships.pid = pics.id AND ${qStr};`, qArr)[0];
         if (infos == undefined) {
             return null;
         }
@@ -527,7 +557,26 @@ class GalleryDownloadQueue {
     };
 
     SQL.getPics = function (gid) {
-        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY page ASC;`, [gid])[0];
+        let infos = SQL.xesb.exec(`
+        SELECT
+            pics.id,
+            relationships.gid,
+            pics.fileIndex,
+            pics.name,
+            relationships.page,
+            pics.type,
+            pics.size,
+            pics.height,
+            pics.width,
+            relationships.reg_date
+        FROM
+            pics,
+            relationships
+        WHERE
+            relationships.pid = pics.id AND
+            relationships.gid = ?
+        ORDER BY
+            page ASC;`, [gid])[0];
         if (infos == undefined) {
             return [];
         }
@@ -544,7 +593,28 @@ class GalleryDownloadQueue {
     };
 
     SQL.getCover = function (gid) {
-        let infos = SQL.xesb.exec(`SELECT * FROM pics WHERE gid = ? ORDER BY page ASC LIMIT 1 OFFSET 0;`, [gid])[0];
+        let infos = SQL.xesb.exec(`
+        SELECT
+            pics.id,
+            relationships.gid,
+            pics.fileIndex,
+            pics.name,
+            relationships.page,
+            pics.type,
+            pics.size,
+            pics.height,
+            pics.width,
+            relationships.reg_date
+        FROM
+            pics,
+            relationships
+        WHERE
+            relationships.pid = pics.id AND
+            relationships.gid = ?
+        ORDER BY
+            page ASC
+        LIMIT 1
+        OFFSET 0;`, [gid])[0];
         if (infos == undefined) {
             return null;
         }
@@ -555,6 +625,7 @@ class GalleryDownloadQueue {
         pic.cache_name = "xesb_pic_" + pic.id;
         return pic;
     };
+    // end
 
     let timerId;
     function auto_sync() {

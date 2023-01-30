@@ -371,7 +371,7 @@ const XESB = (function () {
                     secondaryName: "#gj",
                     cover: "#gd1 > div",
                     categories: "#gdc > div",
-                    auther: "#gdn > a",
+                    uploader: "#gdn > a",
                     infos: "#gdd > table",
                     rating: "#gdr > table",
                     addToFavorites: "#gdf",
@@ -421,10 +421,10 @@ const XESB = (function () {
                 this.categories = this.nodes.categories.text();
 
                 // 作者名
-                this.auther = this.nodes.auther.text() || null;
+                this.uploader = this.nodes.uploader.text() || null;
 
                 // 作者链接
-                this.autherUrl = this.nodes.auther.attr("href") || null;
+                this.uploaderUrl = this.nodes.uploader.attr("href") || null;
 
                 // 发送时间(时间戳
                 this.postTime = moment(temp1.Posted.text()).valueOf();

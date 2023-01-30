@@ -317,15 +317,15 @@ class GalleryDownloadQueue {
         }
         // 添加画廊整体
         SQL.xesb.run("DELETE FROM gallerys WHERE gid = ?;", [gallery.gid]);
-        SQL.xesb.run("INSERT INTO gallerys(url,mainName,secondaryName,cover,pages,categories,auther,autherUrl,parent,parentUrl,language,isTranslation,postTime,visible,fileSize,favorited,favorites,torrentNum,rating,ragingCount,gid,token) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", [
+        SQL.xesb.run("INSERT INTO gallerys(url,mainName,secondaryName,cover,pages,categories,uploader,uploaderUrl,parent,parentUrl,language,isTranslation,postTime,visible,fileSize,favorited,favorites,torrentNum,rating,ragingCount,gid,token) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", [
             gallery.url.toString(),
             gallery.mainName,
             gallery.secondaryName,
             gallery.cover,
             gallery.pages,
             gallery.categories,
-            gallery.auther,
-            gallery.autherUrl,
+            gallery.uploader,
+            gallery.uploaderUrl,
             gallery.parent,
             gallery.parentUrl,
             gallery.language,
@@ -447,18 +447,17 @@ class GalleryDownloadQueue {
     };
 
     SQL.addPic = function (blob, type, gid, imgPage) {
-        console.log(blob, type, gid, imgPage, imgPage.pic.fileIndex);
-        if (SQL.xesb.exec(`SELECT count(*) FROM pics WHERE fileIndex = ?;`, [imgPage.pic.fileIndex])[0]["values"][0][0] == 0) {
-            console.log("in")
+        if (SQL.xesb.exec(`SELECT count(*) FROM pics WHERE type = ? AND gid = AND page = ?;`, [type, gid, imgPage.page])[0]["values"][0][0] == 0) {
             let temparr = [
                 gid,
-                imgPage.pic.fileIndex,
+                null,
                 imgPage.pic.name,
                 imgPage.page,
                 type,
                 blob.size,
             ];
             if (type == "compressed") {
+                temparr[1] == imgPage.pic.fileIndex;
                 temparr.push(
                     imgPage.pic.height,
                     imgPage.pic.width
@@ -473,7 +472,7 @@ class GalleryDownloadQueue {
             SQL.xesb.run("INSERT INTO pics(gid,fileIndex,name,page,type,size,height,width) VALUES(?,?,?,?,?,?,?,?);", temparr);
         }
 
-        let id = SQL.xesb.exec(`SELECT id FROM pics WHERE fileIndex = ?;`, [imgPage.pic.fileIndex])[0]["values"][0][0];
+        let id = SQL.xesb.exec(`SELECT id FROM pics WHERE type = ? AND gid = AND page = ?;`, [type, gid, imgPage.page])[0]["values"][0][0];
         console.log("set cache", id, blob);
         SQL.lastExecTime = Date.now();
         auto_sync();

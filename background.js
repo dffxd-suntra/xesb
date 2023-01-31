@@ -237,7 +237,7 @@ class GalleryDownload {
 
 
 class GalleryDownloadQueue {
-    constructor(processNum = 2) {
+    constructor(processNum = 1) {
         this.processNum = processNum;
         this.waitingQueue = [];
         this.runningQueue = [];
@@ -673,7 +673,8 @@ let typeToFunction = {
             url: request.url,
             onprogress: function () { console.log("progress", arguments) },
             onload: function () { console.log("load", arguments) },
-            onerror: function () { console.log("error", arguments) }
+            onerror: function () { console.log("error", arguments) },
+            downloadProcessNum: 3
         });
         return {
             state: "success"

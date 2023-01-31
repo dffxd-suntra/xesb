@@ -120,7 +120,26 @@ async function useCache(name, value) {
 }
 
 async function storageToObject() {
+    let obj = {};
+
+    SQL.sync();
+    obj["xesb_database_lastExecTime"] = await useCache("xesb_database_lastExecTime");
+    obj["xesb_database"] = await useCache("xesb_database");
+
+    let pics = SQL.xesb.exec("SELECT id FORM pics;")[0]["values"];
+    for (let i in pics) {
+        let id = pics[i][0];
+        let name = "xesb_pic_" + id;
+        obj[name] = await useCache(name);
+    }
+
+    return obj;
 }
 
-async function objectToStorage() {
+async function objectToStorage(obj) {
+    for (let i in obj) {
+        await useCache(i, obj[i]);
+    }
+    
+    SQL.sync();
 }

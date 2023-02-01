@@ -54,6 +54,7 @@ async function showGalleryCards(page, limit) {
         galleryCards.push(await galleryToCard(gallerys[i]));
     }
     $("#galleryCards").append(galleryCards);
+    macy.recalculate();
     setTimeout(function () { macy.recalculate(); }, 1);
     idkscroll.end(gallerys.length, total);
 }

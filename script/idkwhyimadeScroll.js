@@ -50,7 +50,6 @@ class idkScroll {
     // 开启或关闭滚动检测(是否停止检测)
     scroll(str) {
         if (str == "on") {
-            // 开始检测
             // 默认执行一遍
             this.checkBottom();
 
@@ -58,7 +57,7 @@ class idkScroll {
             $(document).scroll(this.proxyFunc);
         }
         if (str == "off") {
-            // 停止检测
+            // 停止滚动检测
             $(document).off("scroll", this.proxyFunc);
         }
     }

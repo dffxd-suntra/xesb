@@ -82,5 +82,5 @@ let idkscroll = new idkScroll("#galleryCards", {
     onBottom: showGalleryCards,
     page: Math.max(1, parseInt(url.searchParams.get("page")) || 1) - 1,
     limit: Math.max(1, parseInt(url.searchParams.get("limit")) || 10),
-    toTop: $(window).height()/2
+    toTop: $(window).height() / 2
 });

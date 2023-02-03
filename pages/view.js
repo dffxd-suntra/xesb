@@ -13,7 +13,7 @@ async function addPic(page, limit) {
         pic.get(0).style.aspectRatio = pics[i].width + "/" + pics[i].height;
         $("#view").append(
             $(`<div class="pics"></div>`).append(
-                $(`<span class="showPage"></span>`).text(pics[i].page+"/"+gallery.pages),
+                $(`<span class="showPage"></span>`).text(pics[i].page + "/" + gallery.pages),
                 pic
             )
         );
@@ -28,7 +28,7 @@ function changeWidth(x) {
     $(showWidthBox).text(viewWidth + "%");
 
     let heightBi = ($(document).scrollTop() - $("#view").offset().top) / $("#view").height();
-    
+
     $("#view").css("width", viewWidth + "%");
 
     if (heightBi > 0) {

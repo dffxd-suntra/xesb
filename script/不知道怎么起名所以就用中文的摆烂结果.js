@@ -144,3 +144,52 @@ async function objectToStorage(obj) {
 
     SQL.sync();
 }
+
+(function () {
+    if (!keyboardJS) {
+        return;
+    }
+
+    let controller = [];
+
+    keyboardJS.pressInSeq = function (keys, func, delay = 1000) {
+        let id = controller.length;
+        let count = 0;
+        let timerId = null;
+        let cancel = function () {
+            if (timerId != null) {
+                clearTimeout(timerId);
+                timerId = null;
+            }
+            keyboardJS.unbind(keys[count], next);
+        };
+        let reStart = function () {
+            cancel();
+            count = 0;
+            keyboardJS.bind(keys[count], next);
+        };
+        let next = function () {
+            if (timerId != null) {
+                clearTimeout(timerId);
+            }
+            keyboardJS.unbind(keys[count], next);
+            count++;
+            if (count == keys.length) {
+                func();
+                reStart();
+            } else {
+                keyboardJS.bind(keys[count], next);
+                timerId = setTimeout(reStart, delay);
+            }
+        };
+        keyboardJS.bind(keys[count], next);
+        controller.push(cancel);
+        return id;
+    };
+
+    keyboardJS.cancelPressInSeq = function (id) {
+        controller[id]();
+    };
+})();
+
+keyboardJS.pressInSeq(["up", "up", "down", "down", "left", "right", "left", "right", ["b", "B"], ["a", "A"], ["b", "B"], ["a", "A"]], function () { console.log("ohhhh") });

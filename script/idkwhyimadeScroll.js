@@ -83,7 +83,7 @@ class idkScroll {
             return;
         }
 
-        this.total = total;
+        this.total = this.total || total;
 
         this.length += length;
 

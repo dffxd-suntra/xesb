@@ -1,25 +1,26 @@
+// 添加具体的一张卡片
 async function galleryToCard(gallery) {
+    // 获取封面信息
     let cover = (await sendMessage({
         type: "getCover",
         gid: gallery.gid
     }));
-    // console.log(cover, gallery);
-    let coverUrl, coverHTML = $(`<img style="width: 100%;"/>`);
+    // 封面链接, 封面元素
+    let coverUrl, coverHTML = $(`<img style="width: 100%;" src="../icons/icon-x1024.png"/>`);
     if (cover != null) {
+        // 有封面就用封面
         let coverBlob = await useCache(cover.cache_name);
-        console.log(coverBlob);
         coverUrl = URL.createObjectURL(coverBlob);
-        coverHTML.get(0).style.aspectRatio = cover.width + "/" + cover.height;
-    } else {
-        coverUrl = "../icons/icon-x1024.png";
+        // 有xss风险, 使用parseInt规避
+        coverHTML.get(0).style.aspectRatio = parseInt(cover.width) + "/" + parseInt(cover.height);
+        coverHTML.attr("src", coverUrl);
     }
-    coverHTML.attr("src", coverUrl);
-    coverHTML = coverHTML.prop("outerHTML");
-    return $(`
+    // 添加到区块
+    $("#galleryCards").append($(`
     <div class="gallery">
         <div class="ui card">
             <div class="image">
-                <a href="view.html?gid=${gallery.gid}" target="_blank">${coverHTML}</a>
+                <a href="view.html?gid=${gallery.gid}" target="_blank">${coverHTML.prop("outerHTML")}</a>
             </div>
             <div class="content">
                 <a href="view.html?gid=${gallery.gid}" target="_blank">
@@ -34,11 +35,14 @@ async function galleryToCard(gallery) {
             </div>
         </div>
     </div>
-    `);
+    `));
+    // 瀑布流计算
+    macy.recalculate();
 }
 
+// 添加一堆卡片(页数, 每页个数)
 async function showGalleryCards(page, limit) {
-    // updateUrl(page, limit);
+    // 获取一堆画廊
     let data = await sendMessage({
         type: "getGalleryInfos",
         data: {
@@ -46,25 +50,27 @@ async function showGalleryCards(page, limit) {
             limit: limit
         }
     });
+    // 数据
     let gallerys = data.gallerys;
+    // 总量
     let total = data.total;
-    let galleryCards = [];
-    // 这里确实可以优化成异步来优化用户体验
+    // 批量存储并等待所有画廊的卡片加载完成
+    let promiseList = [];
     for (let i in gallerys) {
-        galleryCards.push(await galleryToCard(gallerys[i]));
+        promiseList.push(galleryToCard(gallerys[i]));
     }
-    $("#galleryCards").append(galleryCards);
-    macy.recalculate();
-    setTimeout(function () { macy.recalculate(); }, 100);
-    idkscroll.end(gallerys.length, total);
+    Promise.all(promiseList).then(function () {
+        // 计算瀑布流
+        macy.recalculate();
+        // 回调
+        idkscroll.end(gallerys.length, total);
+    });
 }
 
-function updateUrl(page, limit) {
-    history.pushState({}, document.title, `?limit=${limit}&page=${page}`);
-}
-
+// 解析当前url
 let url = new URL(location.href);
 
+// 瀑布流初始化
 let macy = Macy({
     container: "#galleryCards",
     waitForImages: false,
@@ -78,6 +84,7 @@ let macy = Macy({
     }
 });
 
+// 滚动加载初始化
 let idkscroll = new idkScroll("#galleryCards", {
     onBottom: showGalleryCards,
     page: Math.max(1, parseInt(url.searchParams.get("page")) || 1) - 1,

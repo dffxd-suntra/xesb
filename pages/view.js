@@ -1,3 +1,4 @@
+// 添加一堆图片
 async function addPic(page, limit) {
     let start, end;
     start = (page - 1) * limit;
@@ -21,17 +22,25 @@ async function addPic(page, limit) {
     idkscroll.end(end - start, pics.length);
 }
 
+// 阅读宽度
 let viewWidth = 80;
+// 更改阅读宽度
 function changeWidth(x) {
+    // 限定最大最小值
     viewWidth = Math.max(Math.min(viewWidth + x, 100), 1);
 
+    // 展示宽度
     $(showWidthBox).text(viewWidth + "%");
 
+    // 当前高度的比值(阅读进度)
     let heightBi = ($(document).scrollTop() - $("#view").offset().top) / $("#view").height();
 
+    // 更改宽度
     $("#view").css("width", viewWidth + "%");
 
     if (heightBi > 0) {
+        // 加if避免没有到阅读部分的情况
+        // 修复浏览器更改宽度所导致的阅读进度偏移(说白了就是避免图片高度变了,浏览器滚动条还在原来的位置)
         $(document).scrollTop($("#view").offset().top + $("#view").height() * heightBi);
     }
 }
@@ -151,7 +160,9 @@ function showMenu(baseId, menus, appTo = $("body")) {
     return menusBox.get(0);
 }
 
+// 默认全局变量
 let url, pics, gallery, gid, idkscroll, menu, showWidthBox, controlBox;
+// 菜单,会有xss攻击风险?没有,因为不会储存
 menu = {
     "宽度": {
         "": function (node) {
@@ -212,27 +223,35 @@ menu = {
     }
 };
 
+// 初始化放到函数里,因为要异步
 async function init() {
+    // 解析网页链接
     url = new URL(location.href);
 
+    // 获取画廊gid并查找
     gid = parseInt(url.searchParams.get("gid"));
     if (gid == NaN) {
         return;
     }
 
+    // 初始化菜单
     controlBox = showMenu("controlBox", menu, $("#page"));
 
+    // 获取所有图片(重点!)
     pics = await sendMessage({
         type: "getPics",
         gid: gid
     });
 
+    // 获取当前画廊的详细信息(有标签和评论)
     gallery = await sendMessage({
         type: "getGalleryInfo",
         gid: gid
     });
+    // 根据名字个性化标题,没有xss风险(浏览器自动转码)
     document.title = gallery.mainName + " - XESB"
 
+    // 初始化滚动加载
     idkscroll = new idkScroll("#view", {
         onBottom: addPic,
         limit: Math.max(1, parseInt(url.searchParams.get("limit")) || 2),

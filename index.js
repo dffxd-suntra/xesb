@@ -6,7 +6,7 @@ async function galleryToCard(gallery) {
         gid: gallery.gid
     }));
     // 封面链接, 封面元素
-    let coverUrl, coverHTML = $(`<img style="width: 100%;" src="../icons/icon-x1024.png"/>`);
+    let coverUrl, coverHTML = $(`<img style="width: 100%;" src="icons/icon-x1024.png"/>`);
     if (cover != null) {
         // 有封面就用封面
         let coverBlob = await useCache(cover.cache_name);

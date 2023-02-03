@@ -5,7 +5,7 @@
     "version": "3.0.1",
     "version_name": "3.0.1 仅适配下载功能",
     "author": "Suntra",
-    "options_page": "options.html",
+    "options_page": "index.html?tab=options",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "icons": {
         "16": "icons/icon-x16.png",

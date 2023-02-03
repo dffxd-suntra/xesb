@@ -78,7 +78,7 @@ class idkScroll {
         }
     }
     // 回调的回调 代表加载完成,可以继续检测
-    end(length, total) {
+    end(length, total = null) {
         if (!this.dontWait && !this.waitForReturn) {
             return;
         }

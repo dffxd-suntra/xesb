@@ -3,15 +3,18 @@ async function addPic(page, limit) {
     start = (page - 1) * limit;
     end = Math.min(page * limit, pics.length);
     for (let i = start; i < end; i++) {
-        let pic = await useCache(pics[i].cache_name);
-        let picUrl = URL.createObjectURL(pic);
+        pics[i].blob = await useCache(pics[i].cache_name);
+        let picUrl = URL.createObjectURL(pics[i].blob);
+        let pic = $(`<img/>`);
+        pic.attr({
+            src: picUrl,
+            art: pics[i].name
+        });
+        pic.get(0).style.aspectRatio = pics[i].width + "/" + pics[i].height;
         $("#view").append(
             $(`<div class="pics"></div>`).append(
                 $(`<span class="showPage"></span>`).text(pics[i].page+"/"+gallery.pages),
-                $(`<img/>`).attr({
-                    src: picUrl,
-                    art: pics[i].name
-                })
+                pic
             )
         );
     }
@@ -232,7 +235,7 @@ async function init() {
 
     idkscroll = new idkScroll("#view", {
         onBottom: addPic,
-        limit: 2,
+        limit: Math.max(1, parseInt(url.searchParams.get("limit")) || 2),
         toTop: $(window).height()
     });
 }

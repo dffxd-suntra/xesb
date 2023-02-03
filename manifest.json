@@ -19,6 +19,8 @@
         "default_title": "点击查看更多"
     },
     "permissions": [
+        "webRequest",
+        "webRequestBlocking",
         "storage",
         "unlimitedStorage",
         "downloads",

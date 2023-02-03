@@ -9,7 +9,7 @@ async function galleryToCard(gallery) {
         let coverBlob = await useCache(cover.cache_name);
         console.log(coverBlob);
         coverUrl = URL.createObjectURL(coverBlob);
-        coverHTML.get(0).style.aspectRatio = cover.width+"-"+cover.height;
+        coverHTML.get(0).style.aspectRatio = cover.width + "/" + cover.height;
     } else {
         coverUrl = "../icons/icon-x1024.png";
     }
@@ -55,7 +55,7 @@ async function showGalleryCards(page, limit) {
     }
     $("#galleryCards").append(galleryCards);
     macy.recalculate();
-    setTimeout(function () { macy.recalculate(); }, 1);
+    setTimeout(function () { macy.recalculate(); }, 100);
     idkscroll.end(gallerys.length, total);
 }
 
@@ -81,5 +81,6 @@ let macy = Macy({
 let idkscroll = new idkScroll("#galleryCards", {
     onBottom: showGalleryCards,
     page: Math.max(1, parseInt(url.searchParams.get("page")) || 1) - 1,
-    limit: Math.max(1, parseInt(url.searchParams.get("limit")) || 10)
+    limit: Math.max(1, parseInt(url.searchParams.get("limit")) || 10),
+    toTop: $(window).height()/2
 });

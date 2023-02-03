@@ -26,35 +26,35 @@ function formatSize(byte, precision = 2) {
     }
 }
 
-async function useCache(name, value) {
-    // 处理文件名的特殊格式
+// auto为是否自动处理文件名和格式
+async function useCache(name, value, auto = true) {
+    // 文件名为object
     if (name.constructor === Object) {
-        // 最稳定的排序啊啊啊啊
+        // 自动排序,并且
         let keys = Object.keys(name);
-        for (let i = 0; i < keys.length - 1; i++) {
-            for (let j = i + 1; j < keys.length; j++) {
-                if (keys[i] > keys[j]) {
-                    let temp;
+        let newName = [];
 
-                    temp = keys[i];
-                    keys[i] = keys[j];
-                    keys[j] = temp;
+        keys.sort();
 
-                    temp = name[i];
-                    name[i] = name[j];
-                    name[j] = temp;
-                }
-            }
+        for (let i in keys) {
+            newName.push([
+                i,
+                keys[i]
+            ]);
         }
 
-        name = JSON.stringify(name);
+        name = newName;
     }
+
+    // 文件名为数组
     if (name.constructor === Array) {
-        name = name.sort();
         name = JSON.stringify(name);
     }
+
+    // 其他格式,例如 Number 也要稍微处理
     name = name.toString();
 
+    // 如果值是空的,那么就是获取这个键下的值
     if (value === undefined) {
         let data, value;
         data = await new Promise(function (resolve, reject) {
@@ -62,6 +62,7 @@ async function useCache(name, value) {
                 resolve(v[name]);
             });
         });
+
         if (data == undefined) {
             return null;
         }
@@ -88,7 +89,7 @@ async function useCache(name, value) {
         return value;
     }
 
-    // 处理值的特殊格式
+    // data: 附加的数据,例如数据类型等等
     let data = {};
     if (value.constructor === Blob) {
         data.mime = value.type;
@@ -108,7 +109,7 @@ async function useCache(name, value) {
         data.type = data.type || "Uint8Array";
     }
     data.type = data.type || "ori";
-    
+
     let obj = {};
     obj[name] = [data, value];
     // console.log(obj);
@@ -126,7 +127,7 @@ async function storageToObject() {
     obj["xesb_database_lastExecTime"] = await useCache("xesb_database_lastExecTime");
     obj["xesb_database"] = await useCache("xesb_database");
 
-    let pics = SQL.xesb.exec("SELECT id FORM pics;")[0]["values"];
+    let pics = SQL.xesb.exec("SELECT id FROM pics;")[0]["values"];
     for (let i in pics) {
         let id = pics[i][0];
         let name = "xesb_pic_" + id;
@@ -140,6 +141,6 @@ async function objectToStorage(obj) {
     for (let i in obj) {
         await useCache(i, obj[i]);
     }
-    
+
     SQL.sync();
 }

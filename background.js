@@ -234,7 +234,7 @@ class GalleryDownload {
             errorQueue: this.errorQueue,
             completeQueue: this.completeQueue,
             pages: pages,
-            gallery: this.ParseGallery
+            gallery: SQL.getGalleryInfo(this.ParseGallery.gid)
         };
     }
 }

@@ -6,6 +6,7 @@ async function updateDownloadQueue() {
         );
     }
     function generateList(info) {
+        // console.log(info);
         return $(`<li></li>`).append(
             $(`<table></table>`).append(
                 generateTabelPair("名称:", info.gallery.mainName),

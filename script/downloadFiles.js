@@ -21,19 +21,25 @@ const downloadFiles = (function () {
                 // 3. 压缩 false,长度 false
                 // 4. 压缩 true, 长度 false
                 // 第四种最难办,简直就是...!因此,我只考虑第一种,反正只是下载图片,其实还有一种方法,就是套代理,代理过后只要他们自己获取,我也就能获取到,以后再说,现在没有这种功能
-                // 提前添加捕获错误
-                let response = await fetch(this.url.toString());
+                // 初始化超时 套一层函数避免污染this
+                setTimeout(function () { this.abort(); }, this.timeOut);
+                // 初始化取消器
+                this.controller = new AbortController();
+                // 获取
+                let response = await fetch(this.url.toString(), { signal: this.controller.signal });
                 this.response = response;
                 // 阅读器
                 let reader = response.body.getReader();
                 // mime
-                let [mime, encode] = response.headers.get("content-type").split(";");
+                let [mime = "application/octet-stream", encode = "utf-8"] = response.headers.get("content-type").split(";");
+                encode = encode.replace(/charset *= */g, "");
+
                 // 总大小
                 let contentLength = parseInt(response.headers.get('Content-Length'));
                 // 接收的大小
                 let receivedLength = 0;
                 // 长度是否可计算
-                let lengthComputable = (response.headers.get("content-encoding") || "").match(/(gzip|compress|deflate|br)/g) == null;
+                let lengthComputable = this.lengthComputable = (response.headers.get("content-encoding") || "").match(/(gzip|compress|deflate|br)/g) == null;
                 // 接收的数据
                 let chunks = [];
 
@@ -103,6 +109,13 @@ const downloadFiles = (function () {
                 if (this.onload) {
                     this.onload(data, response);
                 }
+            }
+            abort() {
+                if (this.timerId != undefined) {
+                    clearTimeout(this.timerId);
+                }
+                this.controller.abort();
+                throw new Error(`Abort`);
             }
         }
         this.downloader = downloader;

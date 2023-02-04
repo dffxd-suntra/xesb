@@ -47,6 +47,10 @@ class GalleryDownload {
                 }
             }
             async function downloadSuccess(pageInfo, page, retriesNum, blob) {
+                if (blob.type.split("/")[0] != "image") {
+                    downloadFail(pageInfo, page, retriesNum, new Error(`类型错误`));
+                    return;
+                }
                 that.downloadProgress++;
                 let picInfo = await SQL.addPic(blob, that.type, that.ParseGallery.gid, pageInfo);
 
@@ -85,8 +89,8 @@ class GalleryDownload {
                         downloadFail(pageInfo, page, retriesNum, error);
                     },
                     onload: function (data, response) {
-                        if (response.status != 200) {
-                            downloadFail(pageInfo, page, retriesNum, new Error(`http status error ${response.status}`));
+                        if (response.status != 200 || data.type.split("/")[0] != "image") {
+                            downloadFail(pageInfo, page, retriesNum, new Error(`状态或类型错误`));
                         }
                         downloadSuccess(pageInfo, page, retriesNum, data);
                     }
@@ -102,8 +106,8 @@ class GalleryDownload {
                         downloadFail(pageInfo, page, retriesNum, error);
                     },
                     onload: function (data, response) {
-                        if (response.status != 200) {
-                            downloadFail(pageInfo, page, retriesNum, new Error(`http status error ${response.status}`));
+                        if (response.status != 200 || data.type.split("/")[0] != "image") {
+                            downloadFail(pageInfo, page, retriesNum, new Error(`状态或类型错误`));
                         }
                         downloadSuccess(pageInfo, page, retriesNum, data);
                     }
@@ -118,7 +122,7 @@ class GalleryDownload {
                         downloadCompressedSpare(pageInfo, page, retriesNum);
                     },
                     onload: function (data, response) {
-                        if (response.status != 200) {
+                        if (response.status != 200 || data.type.split("/")[0] != "image") {
                             // console.warn("尝试备用路线", error);
                             downloadCompressedSpare(pageInfo, page, retriesNum);
                         }

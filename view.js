@@ -5,17 +5,13 @@ async function addPic(page, limit) {
     end = Math.min(page * limit, pics.length);
     for (let i = start; i < end; i++) {
         pics[i].blob = await useCache(pics[i].cache_name);
-        let picUrl = URL.createObjectURL(pics[i].blob);
-        let pic = $(`<img/>`);
-        pic.attr({
-            src: picUrl,
-            art: pics[i].name
-        });
-        pic.get(0).style.aspectRatio = pics[i].width + "/" + pics[i].height;
         $("#view").append(
             $(`<div class="pics"></div>`).append(
                 $(`<span class="showPage"></span>`).text(pics[i].page + "/" + gallery.pages),
-                pic
+                $(`<img/>`).attr({
+                    src: URL.createObjectURL(pics[i].blob),
+                    art: pics[i].name
+                })
             )
         );
     }
@@ -23,7 +19,7 @@ async function addPic(page, limit) {
 }
 
 // 阅读宽度
-let viewWidth = 80;
+let viewWidth = 60;
 // 更改阅读宽度
 function changeWidth(x) {
     // 限定最大最小值
@@ -233,6 +229,9 @@ async function init() {
     if (gid == NaN) {
         return;
     }
+
+    // 初始化宽度
+    $("#view").css("width", viewWidth+"%");
 
     // 初始化菜单
     controlBox = showMenu("controlBox", menu, $("#page"));

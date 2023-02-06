@@ -415,7 +415,7 @@ const XESB = (function () {
                 this.secondaryName = this.nodes.secondaryName.text();
 
                 // 封面地址
-                this.cover = this.nodes.cover.get(0).style.background.match(/(?<=url\("*).*(?="*\))/g)[0];
+                this.cover = this.nodes.cover.get(0).style.background.match(/(?<=url\("*).*(?="*\))/g)[0].replaceAll("\"", "");
 
                 // 画廊类别(例如 Image Set
                 this.categories = this.nodes.categories.text();
@@ -655,20 +655,20 @@ const XESB = (function () {
             return hashList;
         }
         this.parseSearchCat = parseSearchCat;
-    };
-    function toByte(size, type) {
-        if (!type) {
-            [size, type] = size;
+        function toByte(size, type) {
+            if (!type) {
+                [size, type] = size;
+            }
+            size = new Number(size);
+            let unit = {
+                "BYTE": 1,
+                "KB": 1024,
+                "MB": 1048576,
+                "GB": 1073741824,
+                "TB": 1099511627776,
+                "PB": 1125899906842600,
+            };
+            return size * unit[type];
         }
-        size = new Number(size);
-        let unit = {
-            "BYTE": 1,
-            "KB": 1024,
-            "MB": 1048576,
-            "GB": 1073741824,
-            "TB": 1099511627776,
-            "PB": 1125899906842600,
-        };
-        return size * unit[type];
-    }
+    };
 })();

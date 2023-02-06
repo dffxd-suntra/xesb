@@ -249,7 +249,7 @@ async function init() {
         gid: gid
     });
     // 根据名字个性化标题,没有xss风险(浏览器自动转码)
-    document.title = gallery.mainName + " - XESB"
+    document.title = gallery.mainName + " - 观看 - XESB"
 
     // 初始化滚动加载
     idkscroll = new idkScroll("#view", {

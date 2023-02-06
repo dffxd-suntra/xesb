@@ -131,7 +131,11 @@ async function storageToObject() {
     for (let i in pics) {
         let id = pics[i][0];
         let name = "xesb_pic_" + id;
-        obj[name] = await useCache(name);
+        obj[name] = await new Promise(function (resolve, reject) {
+            chrome.storage.local.get(name, function (v) {
+                resolve(v[name]);
+            });
+        });
     }
 
     return obj;
@@ -192,4 +196,6 @@ async function objectToStorage(obj) {
     };
 })();
 
-keyboardJS.pressInSeq(["up", "up", "down", "down", "left", "right", "left", "right", ["b", "B"], ["a", "A"], ["b", "B"], ["a", "A"]], function () { console.log("ohhhh") });
+keyboardJS.pressInSeq(["up", "up", "down", "down", "left", "right", "left", "right", ["b", "B"], ["a", "A"], ["b", "B"], ["a", "A"]], function () {
+    alert("彩蛋未施工!");
+});

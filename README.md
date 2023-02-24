@@ -1,5 +1,5 @@
 ## 注意,这将是最后一版chrome插件了,我将会尽力的做好并提供给轻度用户使用,接下来将会转到nodejs开发
-
+新项目地址[https://github.com/dffxd-suntra/exlocal](https://github.com/dffxd-suntra/exlocal)
 # 快要开学了,xesb的更新频率也是不能保证了
 
 # xesb

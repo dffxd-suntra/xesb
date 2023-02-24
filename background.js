@@ -156,7 +156,7 @@ class GalleryDownload {
                                 downloadFull(pageInfo, page, retriesNum);
                             }
                         } else {
-                            downloadSuccess(pageInfo, page, retriesNum, await useCache(picCache.cache_name));
+                            downloadSuccess(pageInfo, page, retriesNum, await useCache("local", {name: picCache.cache_name}));
                         }
                     } catch (error) {
                         downloadFail(pageInfo, page, retriesNum, error);
@@ -489,7 +489,7 @@ class GalleryDownloadQueue {
         }
 
         // 创建/更新 缓存
-        useCache("xesb_pic_" + id, blob);
+        useCache("local", {name: "xesb_pic_" + id, value: blob});
         console.log("set cache", id, blob);
         // 自动同步数据库
         SQL.lastExecTime = Date.now();
@@ -645,11 +645,11 @@ class GalleryDownloadQueue {
             return;
         }
         syncing = true;
-        if (SQL.lastExecTime >= (await useCache("xesb_database_lastExecTime") || -1)) {
-            await useCache("xesb_database_lastExecTime", SQL.lastExecTime);
-            await useCache("xesb_database", SQL.xesb.export());
+        if (SQL.lastExecTime >= (await useCache("local", {name: "xesb_database_lastExecTime"}) || -1)) {
+            await useCache("local", {name: "xesb_database_lastExecTime", value: SQL.lastExecTime});
+            await useCache("local", {name: "xesb_database", value: SQL.xesb.export()});
         } else {
-            SQL.xesb = new SQL.SQL.Database(await useCache("xesb_database"));
+            SQL.xesb = new SQL.SQL.Database(await useCache("local", {name: "xesb_database"}));
         }
         syncing = false;
     }

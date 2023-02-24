@@ -4,7 +4,7 @@ async function addPic(page, limit) {
     start = (page - 1) * limit;
     end = Math.min(page * limit, pics.length);
     for (let i = start; i < end; i++) {
-        pics[i].blob = await useCache(pics[i].cache_name);
+        pics[i].blob = await useCache("local", {name: pics[i].cache_name});
         $("#view").append(
             $(`<div class="pics"></div>`).append(
                 $(`<span class="showPage"></span>`).text(pics[i].page + "/" + gallery.pages),

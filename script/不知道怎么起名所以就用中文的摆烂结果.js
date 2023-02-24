@@ -27,7 +27,7 @@ function formatSize(byte, precision = 2) {
 }
 
 // auto为是否自动处理文件名和格式
-async function useCache(name, value, auto = true) {
+async function useCache(type, { name, value, url }) {
     // 文件名为object
     if (name.constructor === Object) {
         // 自动排序,并且
@@ -57,11 +57,18 @@ async function useCache(name, value, auto = true) {
     // 如果值是空的,那么就是获取这个键下的值
     if (value === undefined) {
         let data, value;
-        data = await new Promise(function (resolve, reject) {
-            chrome.storage.local.get(name, function (v) {
-                resolve(v[name]);
+        if (type == "local") {
+            data = await new Promise(function (resolve, reject) {
+                chrome.storage.local.get(name, function (v) {
+                    resolve(v[name]);
+                });
             });
-        });
+        }
+        if (type == "online") {
+            url = new URL(url);
+            url.pathname = "/get/" + name;
+            data = await fetch(url.href).then(res => (res.status == 200 ? res.text() : undefined));
+        }
 
         if (data == undefined) {
             return null;
@@ -113,11 +120,24 @@ async function useCache(name, value, auto = true) {
     let obj = {};
     obj[name] = [data, value];
     // console.log(obj);
-    return await new Promise(function (resolve, reject) {
-        chrome.storage.local.set(obj, function () {
-            resolve();
+
+    if (type == "local") {
+        await new Promise(function (resolve, reject) {
+            chrome.storage.local.set(obj, function () {
+                resolve();
+            });
         });
-    });
+    }
+    if (type == "online") {
+        url = new URL(url);
+        url.pathname = "/set/" + name;
+        let form = new FormData();
+        form.append("file", value);
+        await fetch(url.href, {
+            method: "POST",
+            body: form
+        })
+    }
 }
 
 async function storageToObject() {

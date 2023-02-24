@@ -9,7 +9,7 @@ async function galleryToCard(gallery) {
     let coverUrl, coverHTML = $(`<img style="width: 100%;" src="icons/icon-x1024.png"/>`);
     if (cover != null) {
         // 有封面就用封面
-        let coverBlob = await useCache(cover.cache_name);
+        let coverBlob = await useCache("local", {name: cover.cache_name});
         coverUrl = URL.createObjectURL(coverBlob);
         // 有xss风险, 使用parseInt规避
         coverHTML.get(0).style.aspectRatio = parseInt(cover.width) + "/" + parseInt(cover.height);

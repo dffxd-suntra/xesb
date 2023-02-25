@@ -40,6 +40,10 @@
             align-items: center;
         }
 
+        #page > * {
+            width: 80%;
+        }
+
         #page::after {
             content: "END";
             font-size: min(calc(100vw/3), 100vh);
@@ -52,14 +56,22 @@
             align-items: center;
             overflow: hidden;
         }
+
+        #gallerysContainer, #settingsContainer {
+            margin-bottom: 2em !important;
+            padding: 0.8em !important;
+        }
     </style>
 </head>
 
 <body>
-    <div class="ui grid" id="page">
-        <div class="twelve wide column" style="padding-left: 0;padding-right: 0;">
-            <div class="ui pointing menu inverted">
-                <a class="active item">画廊</a>
+    <div id="page">
+        <div style="padding-left: 0;padding-right: 0;">
+            <div class="ui pointing menu inverted" id="barItemContainer">
+                <a class="active item" data-tab="gallerys">画廊</a>
+                <a class="item" data-tab="settings">设置</a>
+                <a class="item" href="https://e-hentai.org/">打开外站</a>
+                <a class="item" href="https://exhentai.org/">打开内站</a>
                 <div class="right menu">
                     <div class="item">
                         <div class="ui transparent icon input inverted">
@@ -70,10 +82,12 @@
                 </div>
             </div>
         </div>
-        <div class="twelve wide column ui segment inverted" id="galleryCardsContainer"
-            style="margin-bottom: 2em;padding: 0.8em;">
+        <div class="ui segment inverted tab active" id="gallerysContainer" data-tab="gallerys">
             <div id="galleryCards">
             </div>
+        </div>
+        <div class="ui segment inverted tab" id="settingsContainer" data-tab="settings">
+            <h1>设置</h1>
         </div>
     </div>
     <script src="script/jquery.min.js"></script>
@@ -85,7 +99,7 @@
     <script src="script/keyboard.js"></script>
     <script src="script/axios.js"></script>
     <script src="script/FileSaver.min.js"></script>
-    <script src="script/不知道怎么起名所以就用中文的摆烂结果.js"></script>
+    <script src="function/common.function.js"></script>
     <script src="script/xesb.js"></script>
     <script src="script/downloadFiles.js"></script>
     <script src="script/idkwhyimadeScroll.js"></script>

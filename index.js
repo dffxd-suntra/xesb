@@ -70,6 +70,8 @@ async function showGalleryCards(page, limit) {
 // 解析当前url
 let url = new URL(location.href);
 
+$("#barItemContainer > .item[data-tab]").tab();
+
 // 瀑布流初始化
 let macy = Macy({
     container: "#galleryCards",

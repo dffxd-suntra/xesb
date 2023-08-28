@@ -1,6 +1,6 @@
 // 添加具体的一张卡片
 async function galleryToCard(gallery) {
-    // 获取封面信息 
+    // 获取封面信息
     let cover = (await sendMessage({
         type: "getCover",
         gid: gallery.gid
